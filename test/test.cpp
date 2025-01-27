@@ -21,6 +21,9 @@ int total_failures = 0;
         ++total_failures; \
     }
 
+
+// ========================= Matrix_t Tests =========================
+
 // Test Function 1: Operator Access
 void test_operator_access() {
     // Initialize a local stringstream to collect error messages
@@ -50,10 +53,10 @@ void test_operator_access() {
 
     // Determine if the test passed or failed
     if (errors.str().empty()) {
-        std::cout << std::left << std::setw(40) << "[1]. Test Operator Access."
+        std::cout << std::left << std::setw(50) << "[MT1]. Test Operator Access."
                   << GREEN << "[Passed]" << RESET << std::endl;
     } else {
-        std::cout << std::left << std::setw(40) << "[1]. Test Operator Access."
+        std::cout << std::left << std::setw(50) << "[MT1]. Test Operator Access."
                   << RED << "[Failed]" << RESET << std::endl;
         // Print the collected error messages
         std::cout << errors.str() << std::endl;
@@ -84,10 +87,10 @@ void test_get_set() {
 
     // Determine if the test passed or failed
     if (errors.str().empty()) {
-        std::cout << std::left << std::setw(40) << "[2]. Test Getter/Setter Methods."
+        std::cout << std::left << std::setw(50) << "[MT2]. Test Getter/Setter Methods."
                   << GREEN << "[Passed]" << RESET << std::endl;
     } else {
-        std::cout << std::left << std::setw(40) << "[2]. Test Getter/Setter Methods."
+        std::cout << std::left << std::setw(50) << "[MT2]. Test Getter/Setter Methods."
                   << RED << "[Failed]" << RESET << std::endl;
         // Print the collected error messages
         std::cout << errors.str() << std::endl;
@@ -144,12 +147,359 @@ void test_save() {
 
     // Determine if the test passed or failed
     if (errors.str().empty()) {
-        std::cout << std::left << std::setw(40) << "[3]. Test Matrix Save Method."
+        std::cout << std::left << std::setw(50) << "[MT3]. Test Matrix Save Method."
                   << GREEN << "[Passed]" << RESET << std::endl;
     } else {
-        std::cout << std::left << std::setw(40) << "[3]. Test Matrix Save Method."
+        std::cout << std::left << std::setw(50) << "[MT3]. Test Matrix Save Method."
                   << RED << "[Failed]" << RESET << std::endl;
         // Print the collected error messages
+        std::cout << errors.str()<< std::endl;
+    }
+}
+
+// ========================= DependencyTable Tests =========================
+
+// Test Function 4: Default Constructor
+void test_default_constructor() {
+    std::stringstream errors;
+
+    DependencyTable dt;
+
+    // Check initial dimensions
+    CHECK(dt.rows() == 0, "Default constructor should initialize rows to 0", errors);
+    CHECK(dt.cols() == 0, "Default constructor should initialize columns to 0", errors);
+
+    // Check data pointer is nullptr (Not directly accessible, so we rely on rows and cols)
+    // Alternatively, if you add a method to check data pointer, you can test it here
+
+    // Determine if the test passed or failed
+    if (errors.str().empty()) {
+        std::cout << std::left << std::setw(50) << "[DT1]. Test Default Constructor."
+                  << GREEN << "[Passed]" << RESET << std::endl;
+    } else {
+        std::cout << std::left << std::setw(50) << "[DT1]. Test Default Constructor."
+                  << RED << "[Failed]" << RESET << std::endl;
+        std::cout << errors.str()<< std::endl;
+    }
+}
+
+// Test Function 5: Parameterized Constructor
+void test_parameterized_constructor() {
+    std::stringstream errors;
+
+    size_t rows = 3;
+    size_t cols = 4;
+    DependencyTable dt(rows, cols);
+
+    // Check dimensions
+    CHECK(dt.rows() == rows, "Parameterized constructor should set correct number of rows", errors);
+    CHECK(dt.cols() == cols, "Parameterized constructor should set correct number of columns", errors);
+
+    // Check all dependencies are initialized to false (default)
+    for (size_t i = 0; i < rows; ++i) {
+        for (size_t j = 0; j < cols; ++j) {
+            CHECK(dt.getDependency(i, j) == false, "All dependencies should be initialized to false", errors);
+        }
+    }
+
+    // Determine if the test passed or failed
+    if (errors.str().empty()) {
+        std::cout << std::left << std::setw(50) << "[DT2]. Test Parameterized Constructor."
+                  << GREEN << "[Passed]" << RESET << std::endl;
+    } else {
+        std::cout << std::left << std::setw(50) << "[DT2]. Test Parameterized Constructor."
+                  << RED << "[Failed]" << RESET << std::endl;
+        std::cout << errors.str()<< std::endl;
+    }
+}
+
+// Test Function 6: Init Method
+void test_init() {
+    std::stringstream errors;
+
+    DependencyTable dt;
+    size_t initial_rows = 2;
+    size_t initial_cols = 2;
+    dt.init(initial_rows, initial_cols);
+
+    // Check dimensions after init
+    CHECK(dt.rows() == initial_rows, "Init method should set correct number of rows", errors);
+    CHECK(dt.cols() == initial_cols, "Init method should set correct number of columns", errors);
+
+    // Check all dependencies are initialized to false
+    for (size_t i = 0; i < initial_rows; ++i) {
+        for (size_t j = 0; j < initial_cols; ++j) {
+            CHECK(dt.getDependency(i, j) == false, "All dependencies should be initialized to false after init", errors);
+        }
+    }
+
+    // Re-initialize with different dimensions
+    size_t new_rows = 4;
+    size_t new_cols = 5;
+    dt.init(new_rows, new_cols);
+
+    // Check new dimensions
+    CHECK(dt.rows() == new_rows, "Init method should correctly reinitialize number of rows", errors);
+    CHECK(dt.cols() == new_cols, "Init method should correctly reinitialize number of columns", errors);
+
+    // Check all dependencies are reset to false
+    for (size_t i = 0; i < new_rows; ++i) {
+        for (size_t j = 0; j < new_cols; ++j) {
+            CHECK(dt.getDependency(i, j) == false, "All dependencies should be reset to false after re-init", errors);
+        }
+    }
+
+    // Determine if the test passed or failed
+    if (errors.str().empty()) {
+        std::cout << std::left << std::setw(50) << "[DT3]. Test Init Method."
+                  << GREEN << "[Passed]" << RESET << std::endl;
+    } else {
+        std::cout << std::left << std::setw(50) << "[DT3]. Test Init Method."
+                  << RED << "[Failed]" << RESET << std::endl;
+        std::cout << errors.str()<< std::endl;
+    }
+}
+
+// Test Function 7: Move Constructor
+void test_move_constructor() {
+    std::stringstream errors;
+
+    size_t rows = 3;
+    size_t cols = 3;
+    DependencyTable dt1(rows, cols);
+    dt1.setDependency(0, 0, true);
+    dt1.setDependency(1, 1, true);
+    dt1.setDependency(2, 2, true);
+
+    // Move construct dt2 from dt1
+    DependencyTable dt2(std::move(dt1));
+
+    // Check dt2 has the data
+    CHECK(dt2.rows() == rows, "Move constructor should transfer correct number of rows", errors);
+    CHECK(dt2.cols() == cols, "Move constructor should transfer correct number of columns", errors);
+    CHECK(dt2.getDependency(0, 0) == true, "Move constructor should transfer dependency at (0,0)", errors);
+    CHECK(dt2.getDependency(1, 1) == true, "Move constructor should transfer dependency at (1,1)", errors);
+    CHECK(dt2.getDependency(2, 2) == true, "Move constructor should transfer dependency at (2,2)", errors);
+
+    // Check dt1 is in a valid state (rows and cols should be 0)
+    CHECK(dt1.rows() == 0, "After move, source should have rows set to 0", errors);
+    CHECK(dt1.cols() == 0, "After move, source should have columns set to 0", errors);
+
+    // Determine if the test passed or failed
+    if (errors.str().empty()) {
+        std::cout << std::left << std::setw(50) << "[DT4]. Test Move Constructor."
+                  << GREEN << "[Passed]" << RESET << std::endl;
+    } else {
+        std::cout << std::left << std::setw(50) << "[DT4]. Test Move Constructor."
+                  << RED << "[Failed]" << RESET << std::endl;
+        std::cout << errors.str()<< std::endl;
+    }
+}
+
+// Test Function 8: Move Assignment Operator
+void test_move_assignment() {
+    std::stringstream errors;
+
+    size_t rows1 = 2;
+    size_t cols1 = 2;
+    DependencyTable dt1(rows1, cols1);
+    dt1.setDependency(0, 0, true);
+    dt1.setDependency(1, 1, true);
+
+    size_t rows2 = 4;
+    size_t cols2 = 4;
+    DependencyTable dt2(rows2, cols2);
+    dt2.setDependency(0, 0, true);
+    dt2.setDependency(3, 3, true);
+
+    // Move assign dt1 to dt2
+    dt2 = std::move(dt1);
+
+    // Check dt2 has the data from dt1
+    CHECK(dt2.rows() == rows1, "Move assignment should transfer correct number of rows", errors);
+    CHECK(dt2.cols() == cols1, "Move assignment should transfer correct number of columns", errors);
+    CHECK(dt2.getDependency(0, 0) == true, "Move assignment should transfer dependency at (0,0)", errors);
+    CHECK(dt2.getDependency(1, 1) == true, "Move assignment should transfer dependency at (1,1)", errors);
+
+    // Check dt1 is in a valid state
+    CHECK(dt1.rows() == 0, "After move assignment, source should have rows set to 0", errors);
+    CHECK(dt1.cols() == 0, "After move assignment, source should have columns set to 0", errors);
+
+    // Ensure dt2 no longer has old data (size2 was 4x4, now 2x2)
+    // Attempting to access (3,3) should throw
+    try {
+        dt2.getDependency(3, 3);
+        errors << RED << "Failure: Accessing (3,3) should throw after move assignment." << RESET << std::endl;
+        ++total_failures;
+    } catch (const std::out_of_range&) {
+        // Expected exception
+    } catch (...) {
+        errors << RED << "Failure: Unexpected exception type when accessing out-of-bounds." << RESET << std::endl;
+        ++total_failures;
+    }
+
+    // Determine if the test passed or failed
+    if (errors.str().empty()) {
+        std::cout << std::left << std::setw(50) << "[DT5]. Test Move Assignment Operator."
+                  << GREEN << "[Passed]" << RESET << std::endl;
+    } else {
+        std::cout << std::left << std::setw(50) << "[DT5]. Test Move Assignment Operator."
+                  << RED << "[Failed]" << RESET << std::endl;
+        std::cout << errors.str()<< std::endl;
+    }
+}
+
+// Test Function 9: Get and Set Dependency
+void test_get_set_dependency() {
+    std::stringstream errors;
+
+    size_t rows = 3;
+    size_t cols = 3;
+    DependencyTable dt(rows, cols);
+
+    // Set some dependencies
+    dt.setDependency(0, 0, true);
+    dt.setDependency(1, 1, true);
+    dt.setDependency(2, 2, true);
+    dt.setDependency(0, 2, true);
+
+    // Get and check dependencies
+    CHECK(dt.getDependency(0, 0) == true, "Dependency at (0,0) should be true", errors);
+    CHECK(dt.getDependency(1, 1) == true, "Dependency at (1,1) should be true", errors);
+    CHECK(dt.getDependency(2, 2) == true, "Dependency at (2,2) should be true", errors);
+    CHECK(dt.getDependency(0, 2) == true, "Dependency at (0,2) should be true", errors);
+    CHECK(dt.getDependency(0, 1) == false, "Dependency at (0,1) should be false", errors);
+    CHECK(dt.getDependency(1, 0) == false, "Dependency at (1,0) should be false", errors);
+
+    // Determine if the test passed or failed
+    if (errors.str().empty()) {
+        std::cout << std::left << std::setw(50) << "[DT6]. Test Get and Set Dependency."
+                  << GREEN << "[Passed]" << RESET << std::endl;
+    } else {
+        std::cout << std::left << std::setw(50) << "[DT6]. Test Get and Set Dependency."
+                  << RED << "[Failed]" << RESET << std::endl;
+        std::cout << errors.str()<< std::endl;
+    }
+}
+
+// Test Function 10: Operator Overloading
+void test_operator_overloading() {
+    std::stringstream errors;
+
+    size_t rows = 2;
+    size_t cols = 2;
+    DependencyTable dt(rows, cols);
+
+    // Use operator() to set dependencies
+    try {
+        dt(0, 0, true);
+        dt(1, 1, true);
+        dt(0, 1, false);
+        dt(1, 0, true);
+    } catch (...) {
+        errors << RED << "Failure: Operator() threw an unexpected exception during setting." << RESET << std::endl;
+        ++total_failures;
+    }
+
+    // Use operator() to get dependencies and verify
+    try {
+        CHECK(dt(0, 0) == true, "Operator() should return true for (0,0)", errors);
+        CHECK(dt(1, 1) == true, "Operator() should return true for (1,1)", errors);
+        CHECK(dt(0, 1) == false, "Operator() should return false for (0,1)", errors);
+        CHECK(dt(1, 0) == true, "Operator() should return true for (1,0)", errors);
+    } catch (...) {
+        errors << RED << "Failure: Operator() threw an unexpected exception during getting." << RESET << std::endl;
+        ++total_failures;
+    }
+
+    // Attempt to access out-of-bounds using operator() and expect exceptions
+    try {
+        dt(2, 2); // Should throw
+        errors << RED << "Failure: Accessing (2,2) should throw an exception." << RESET << std::endl;
+        ++total_failures;
+    } catch (const std::out_of_range&) {
+        // Expected exception
+    } catch (...) {
+        errors << RED << "Failure: Unexpected exception type when accessing out-of-bounds with operator()." << RESET << std::endl;
+        ++total_failures;
+    }
+
+    // Determine if the test passed or failed
+    if (errors.str().empty()) {
+        std::cout << std::left << std::setw(50) << "[DT7]. Test Operator Overloading."
+                  << GREEN << "[Passed]" << RESET << std::endl;
+    } else {
+        std::cout << std::left << std::setw(50) << "[DT7]. Test Operator Overloading."
+                  << RED << "[Failed]" << RESET << std::endl;
+        std::cout << errors.str()<< std::endl;
+    }
+}
+
+// Test Function 11: Out of Bounds Access
+void test_out_of_bounds() {
+    std::stringstream errors;
+
+    size_t rows = 2;
+    size_t cols = 2;
+    DependencyTable dt(rows, cols);
+
+    /*
+    // Test getDependency out-of-bounds
+    try {
+        dt.getDependency(2, 0);
+        errors << RED << "Failure: getDependency(2,0) should throw an exception." << RESET << std::endl;
+        ++total_failures;
+    } catch (const std::out_of_range&) {
+        // Expected exception
+    } catch (...) {
+        errors << RED << "Failure: Unexpected exception type in getDependency out-of-bounds." << RESET << std::endl;
+        ++total_failures;
+    }
+
+    // Test setDependency out-of-bounds
+    try {
+        dt.setDependency(0, 2, true);
+        errors << RED << "Failure: setDependency(0,2) should throw an exception." << RESET << std::endl;
+        ++total_failures;
+    } catch (const std::out_of_range&) {
+        // Expected exception
+    } catch (...) {
+        errors << RED << "Failure: Unexpected exception type in setDependency out-of-bounds." << RESET << std::endl;
+        ++total_failures;
+    }
+    */
+
+    // Test operator() get out-of-bounds
+    try {
+        dt(0, 3);
+        errors << RED << "Failure: operator()(0,3) should throw an exception." << RESET << std::endl;
+        ++total_failures;
+    } catch (const std::out_of_range&) {
+        // Expected exception
+    } catch (...) {
+        errors << RED << "Failure: Unexpected exception type in operator() get out-of-bounds." << RESET << std::endl;
+        ++total_failures;
+    }
+
+    // Test operator() set out-of-bounds
+    try {
+        dt(3, 0, true);
+        errors << RED << "Failure: operator()(3,0, true) should throw an exception." << RESET << std::endl;
+        ++total_failures;
+    } catch (const std::out_of_range&) {
+        // Expected exception
+    } catch (...) {
+        errors << RED << "Failure: Unexpected exception type in operator() set out-of-bounds." << RESET << std::endl;
+        ++total_failures;
+    }
+
+    // Determine if the test passed or failed
+    if (errors.str().empty()) {
+        std::cout << std::left << std::setw(50) << "[DT8]. Test Out of Bounds Access."
+                  << GREEN << "[Passed]" << RESET << std::endl;
+    } else {
+        std::cout << std::left << std::setw(50) << "[DT8]. Test Out of Bounds Access."
+                  << RED << "[Failed]" << RESET << std::endl;
         std::cout << errors.str()<< std::endl;
     }
 }
@@ -168,10 +518,22 @@ int main(int argc, char *argv[]) {
 
     std::cout << "Testing Matrix Methods." << std::endl;
 
-    // Run test functions
+    // Run matrix_t test functions
     test_operator_access();
     test_get_set();
     test_save();
+
+    std::cout << "\nTesting DependencyTable Methods." << std::endl;
+
+    // Run DependencyTable test functions
+    test_default_constructor();
+    test_parameterized_constructor();
+    test_init();
+    test_move_constructor();
+    test_move_assignment();
+    test_get_set_dependency();
+    test_operator_overloading();
+    test_out_of_bounds();
 
     std::cout << std::endl;
 
