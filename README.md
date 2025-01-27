@@ -40,9 +40,9 @@ To clean the build files, run:
 make clean
 ```
 
-### This will remove all object files and executables.
+This will remove all object files and executables.
 
-Running the Program
+### Running the Program
 To run the compiled program, use:
 
 ```sh
