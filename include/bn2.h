@@ -20,7 +20,7 @@ public:
     matrix_t(int rows, int cols) : m(rows), n(cols), data(rows * cols) {}
 
     matrix_t(const std::string& filename) {
-    read_matrix(filename);
+        read_matrix(filename);
     }
 
     // Method to read matrix from a file
@@ -85,12 +85,20 @@ public:
         data[row * n + col] = value;
     }
 
+    inline T* data_ptr() {
+        return data.data();
+    }
+
+    inline const T* data_ptr() const {
+        return data.data();
+    }
+
     void display() const{
         if (m == 0 || n == 0 || data.empty()) {
             std::cerr << "Matrix is not allocated.\n";
             return;
         }
-        
+
         for (int i = 0; i < m; ++i) {
             for (int j = 0; j < n; ++j) {
                 std::cout << data[i * n + j] << " ";
