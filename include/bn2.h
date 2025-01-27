@@ -1,0 +1,89 @@
+#include <iostream>
+#include <vector>
+#include <fstream>
+#include <sstream>
+#include <string>
+#include <stdexcept>
+
+template <class T>
+class matrix_t {
+private:
+    int m;                  // Number of rows
+    int n;                  // Number of columns
+    std::vector<T> data;    // Flat vector to store matrix elements
+
+public:
+    // Default constructor
+    matrix_t() : m(0), n(0), data() {}
+
+    // Parameterized constructor
+    matrix_t(int rows, int cols) : m(rows), n(cols), data(rows * cols) {}
+
+    matrix_t(const std::string& filename) {
+    read_matrix(filename);
+    }
+
+    // Method to read matrix from a file
+    void read_matrix(const std::string& filename){
+        std::ifstream infile(filename);
+        if (!infile.is_open()) {
+            throw std::runtime_error("Error opening file: " + filename);
+        }
+
+        // Read matrix dimensions
+        infile >> m >> n;
+        if (infile.fail()) {
+            throw std::runtime_error("Error reading matrix dimensions from file.");
+        }
+
+        // Resize the data vector to hold m * n elements
+        data.resize(m * n);
+
+        // Read matrix elements
+        for (int i = 0; i < m; ++i) {
+            for (int j = 0; j < n; ++j) {
+                infile >> data[i * n + j];
+                if (infile.fail()) {
+                    throw std::runtime_error("Error reading matrix value at (" +
+                                            std::to_string(i) + ", " + std::to_string(j) + ").");
+                }
+            }
+        }
+
+        T extra;
+        if (infile >> extra) {
+            throw std::runtime_error("Extra data found in the file after reading the matrix.");
+        }
+
+        infile.close();
+    }
+
+    // Accessor methods
+    int rows() const { return m; }
+    int cols() const { return n; }
+
+    // Operator to access elements
+    T& operator()(int row, int col) {
+        if (row < 0 || row >= m || col < 0 || col >= n) {
+            throw std::out_of_range("Matrix indices out of range");
+        }
+        return data[row * n + col];
+    }
+
+    const T& operator()(int row, int col) const {
+        if (row < 0 || row >= m || col < 0 || col >= n) {
+            throw std::out_of_range("Matrix indices out of range");
+        }
+        return data[row * n + col];
+    }
+
+
+    void display() const{
+            for (int i = 0; i < m; ++i) {
+        for (int j = 0; j < n; ++j) {
+            std::cout << data[i * n + j] << " ";
+        }
+        std::cout << "\n";
+    }
+    }
+};
