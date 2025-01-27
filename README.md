@@ -1,1 +1,1 @@
-#### Dynamic Task Scheduling for Triangular Linear Algebra Systems
+### Dynamic Task Scheduling for Triangular Linear Algebra Systems
