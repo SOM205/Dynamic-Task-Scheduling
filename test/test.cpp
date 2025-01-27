@@ -67,7 +67,6 @@ int main(int argc, char *argv[]){
     std::cout << std::endl;
 
     std::cout << GREEN << "All tests passed." << RESET << std::endl;
-    return 0;
 
     return 0;
 }
