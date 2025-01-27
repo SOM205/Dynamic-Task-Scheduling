@@ -77,13 +77,25 @@ public:
         return data[row * n + col];
     }
 
+    inline T get(int row, int col) const {
+        return data[row * n + col];
+    }
+
+    inline void set(int row, int col, T value) {
+        data[row * n + col] = value;
+    }
 
     void display() const{
-            for (int i = 0; i < m; ++i) {
-        for (int j = 0; j < n; ++j) {
-            std::cout << data[i * n + j] << " ";
+        if (m == 0 || n == 0 || data.empty()) {
+            std::cerr << "Matrix is not allocated.\n";
+            return;
         }
+        
+        for (int i = 0; i < m; ++i) {
+            for (int j = 0; j < n; ++j) {
+                std::cout << data[i * n + j] << " ";
+            }
         std::cout << "\n";
-    }
+        }
     }
 };
