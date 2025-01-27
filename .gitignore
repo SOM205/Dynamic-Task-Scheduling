@@ -1,0 +1,8 @@
+# Ignore all files in the build directory
+build/
+
+# Ignore object files
+*.o
+
+# Ignore executable files
+*.out
