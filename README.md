@@ -66,5 +66,12 @@ make test
 This will create the test executable test.out and run the tests.
 
 ### Additional Targets
-make run: Runs the compiled program.
-make create_build_dir: Creates the build directory if it doesn't exist.
+```sh
+make run
+```
+Runs the compiled program.
+
+```sh
+make create_build_dir
+```
+Creates the build directory if it doesn't exist.
