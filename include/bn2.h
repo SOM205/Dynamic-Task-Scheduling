@@ -106,4 +106,34 @@ public:
         std::cout << "\n";
         }
     }
+
+    void save(const std::string& filename) const {
+        // Check if the matrix has been allocated (i.e., has non-zero dimensions)
+        if (m == 0 || n == 0 || data.empty()) {
+            std::cerr << "Matrix is not allocated.\n";
+            return;
+        }
+
+        std::ofstream outfile(filename);
+        if (!outfile.is_open()) {
+            throw std::runtime_error("Error opening file for writing: " + filename);
+        }
+
+        // Write the matrix data
+        for (int i = 0; i < m; ++i) {
+            for (int j = 0; j < n; ++j) {
+                outfile << data[i * n + j];
+                if (j < n - 1) {
+                    outfile << " ";
+                }
+            }
+            outfile << "\n";
+            if (outfile.fail()) {
+                throw std::runtime_error("Error writing matrix data to file: " + filename);
+            }
+        }
+
+        outfile.close();
+    }
 };
+
