@@ -1,6 +1,7 @@
 #include <iostream>
 #include <cassert>
 #include <string>
+#include <iomanip>  // Added for std::setw and std::left
 #include "bn2.h"
 
 #define GREEN "\033[32m"
@@ -27,7 +28,8 @@ void test_operator_access() {
     assert(constMat(1, 1) == 5);
     assert(constMat(2, 2) == 9);
 
-    std::cout<< "Test Operator Access."<< GREEN << "Passed" << RESET << std::endl;
+    std::cout << std::left << std::setw(40) << "  [1]. Test Operator Access."
+              << GREEN << "[Passed]" << RESET << std::endl;
 }
 
 void test_get_set() {
@@ -46,7 +48,8 @@ void test_get_set() {
     assert(mat.get(1, 1) == 5);
     assert(mat.get(2, 2) == 9);
 
-    std::cout << "Test Getter/Setter Methods." << GREEN<< "[Passed]" << RESET << std::endl;
+    std::cout << std::left << std::setw(40) << "  [2]. Test Getter/Setter Methods."
+              << GREEN << "[Passed]" << RESET << std::endl;
 }
 
 void test_save() {
@@ -86,7 +89,8 @@ void test_save() {
     // Clean up the test file
     std::remove(filename.c_str());
 
-    std::cout << "Test Matrix Save Method." <<GREEN <<"[Passed]"<<RESET<< std::endl;
+    std::cout << std::left << std::setw(40) << "  [3]. Test Matrix Save Method."
+              << GREEN << "[Passed]" << RESET << std::endl;
 }
 
 
@@ -108,7 +112,7 @@ int main(int argc, char *argv[]){
     test_save();
     std::cout << std::endl;
 
-    std::cout << GREEN << "All tests passed." << RESET << std::endl;
+    std::cout << GREEN << "All"<< RESET << " tests passed." << std::endl;
 
     return 0;
 }
