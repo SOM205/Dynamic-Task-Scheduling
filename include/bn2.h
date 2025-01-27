@@ -137,3 +137,100 @@ public:
     }
 };
 
+class DependencyTable {
+    size_t m;        // Number of rows
+    size_t n;        // Number of columns
+    bool* data;      // Pointer to the dynamically allocated bool array
+
+    public:
+    // Default constructor
+    DependencyTable() : m(0), n(0), data(nullptr) {}
+
+    // Constructor: Initializes the dependency table with given rows and columns
+    DependencyTable(size_t total_task_rows, size_t total_task_cols) : m(0), n(0), data(nullptr) {
+        init(total_task_rows, total_task_cols);
+    }
+
+    // Destructor: Frees the dynamically allocated memory
+    ~DependencyTable() {
+        delete[] data;
+    }
+
+    // Deleted copy constructor and copy assignment to prevent accidental copying
+    DependencyTable(const DependencyTable&) = delete;
+    DependencyTable& operator=(const DependencyTable&) = delete;
+
+    // Move constructor
+    DependencyTable(DependencyTable&& other) noexcept
+        : m(other.m), n(other.n), data(other.data) {
+        other.m = 0;
+        other.n = 0;
+        other.data = nullptr;
+    }
+
+    // Move assignment operator
+    DependencyTable& operator=(DependencyTable&& other) noexcept {
+        if (this != &other) {
+            delete[] data;
+            m = other.m;
+            n = other.n;
+            data = other.data;
+
+            other.m = 0;
+            other.n = 0;
+            other.data = nullptr;
+        }
+        return *this;
+    }
+
+    // Initializes the dependency table with given rows and columns
+    void init(size_t total_task_rows, size_t total_task_cols) {
+        delete[] data; // Clean up existing data if any
+        m = total_task_rows;
+        n = total_task_cols;
+        data = new bool[m * n]();
+    }
+
+    // Retrieves the dependency value at (i, j)
+    inline bool getDependency(size_t i, size_t j) const {
+        size_t idx =  i * n + j;
+        return data[idx];
+    }
+
+    // Sets the dependency value at (i, j)
+    inline void setDependency(size_t i, size_t j, bool value) {
+        size_t idx =  i * n + j;
+        data[idx] = value;
+    }
+
+    // Overloaded operator() for safe indexing
+    bool operator()(size_t i, size_t j) const {
+        if (i >= m || j >= n) {
+            throw std::out_of_range("Index out of bounds: (" + std::to_string(i) + ", " + std::to_string(j) + ")");
+        }
+        return getDependency(i, j);
+    }
+
+    // Overloaded operator() for safe setting with bounds checking
+    void operator()(size_t i, size_t j, bool value) {
+        if (i >= m || j >= n) {
+            throw std::out_of_range("Index out of bounds: (" + std::to_string(i) + ", " + std::to_string(j) + ")");
+        }
+        setDependency(i, j, value);
+    }
+
+    // Prints the dependency table
+    void printDependencyTable() const {
+        for (size_t i = 0; i < m; ++i) {
+            for (size_t j = 0; j < n; ++j) {
+                std::cout << (getDependency(i, j) ? "1 " : "0 ");
+            }
+            std::cout << "\n";
+        }
+    }
+
+    // Accessors for rows and columns
+    size_t rows() const { return m; }
+    size_t cols() const { return n; }
+
+};
