@@ -7,8 +7,9 @@
 #include "bn2.h"     // Include the matrix_t class
 
 // Define color codes
-#define GREEN "\033[32m"
 #define RED "\033[31m"
+#define GREEN "\033[32m"
+#define YELLOW "\033[33m"
 #define RESET "\033[0m"
 
 // Global counter for total failures
@@ -504,6 +505,343 @@ void test_out_of_bounds() {
     }
 }
 
+// =================== DependencyTableAtomic Tests ======================== //
+
+// Test 1: Default Constructor
+void test_default_constructor_atomic() {
+    std::stringstream errors;
+
+    DependencyTableAtomic dt;
+
+    // Check initial dimensions
+    CHECK(dt.rows() == 0, "Default constructor should initialize rows to 0", errors);
+    CHECK(dt.cols() == 0, "Default constructor should initialize cols to 0", errors);
+
+    // Determine if the test passed or failed
+    if (errors.str().empty()) {
+        std::cout << std::left << std::setw(50)
+                  << "[DTA1]. Test Default Constructor."
+                  << GREEN << "[Passed]" << RESET << std::endl;
+    } else {
+        std::cout << std::left << std::setw(50)
+                  << "[DTA1]. Test Default Constructor."
+                  << RED << "[Failed]" << RESET << std::endl;
+        std::cout << errors.str() << std::endl;
+    }
+}
+
+// Test 2: Parameterized Constructor
+void test_parameterized_constructor_atomic() {
+    std::stringstream errors;
+
+    size_t rows = 3;
+    size_t cols = 4;
+    DependencyTableAtomic dt(rows, cols);
+
+    // Check dimensions
+    CHECK(dt.rows() == rows, "Parameterized constructor should set correct number of rows", errors);
+    CHECK(dt.cols() == cols, "Parameterized constructor should set correct number of columns", errors);
+
+    // Check all dependencies are initialized to false by default
+    for (size_t i = 0; i < rows; ++i) {
+        for (size_t j = 0; j < cols; ++j) {
+            CHECK(dt.getDependency(i, j) == false,
+                  "All dependencies should be initialized to false", errors);
+        }
+    }
+
+    // Determine if the test passed or failed
+    if (errors.str().empty()) {
+        std::cout << std::left << std::setw(50)
+                  << "[DTA2]. Test Parameterized Constructor."
+                  << GREEN << "[Passed]" << RESET << std::endl;
+    } else {
+        std::cout << std::left << std::setw(50)
+                  << "[DTA2]. Test Parameterized Constructor."
+                  << RED << "[Failed]" << RESET << std::endl;
+        std::cout << errors.str() << std::endl;
+    }
+}
+
+// Test 3: Init Method
+void test_init_atomic() {
+    std::stringstream errors;
+
+    DependencyTableAtomic dt;
+    size_t initial_rows = 2;
+    size_t initial_cols = 2;
+    dt.init(initial_rows, initial_cols);
+
+    // Check dimensions after init
+    CHECK(dt.rows() == initial_rows, "Init method should set correct number of rows", errors);
+    CHECK(dt.cols() == initial_cols, "Init method should set correct number of columns", errors);
+
+    // Check all dependencies are initialized to false
+    for (size_t i = 0; i < initial_rows; ++i) {
+        for (size_t j = 0; j < initial_cols; ++j) {
+            CHECK(dt.getDependency(i, j) == false,
+                  "All dependencies should be initialized to false after init", errors);
+        }
+    }
+
+    // Re-initialize with different dimensions
+    size_t new_rows = 4;
+    size_t new_cols = 5;
+    dt.init(new_rows, new_cols);
+
+    // Check new dimensions
+    CHECK(dt.rows() == new_rows, "Init method should correctly reinitialize number of rows", errors);
+    CHECK(dt.cols() == new_cols, "Init method should correctly reinitialize number of columns", errors);
+
+    // Check all dependencies are reset to false
+    for (size_t i = 0; i < new_rows; ++i) {
+        for (size_t j = 0; j < new_cols; ++j) {
+            CHECK(dt.getDependency(i, j) == false,
+                  "All dependencies should be reset to false after re-init", errors);
+        }
+    }
+
+    // Determine if the test passed or failed
+    if (errors.str().empty()) {
+        std::cout << std::left << std::setw(50)
+                  << "[DTA3]. Test Init Method."
+                  << GREEN << "[Passed]" << RESET << std::endl;
+    } else {
+        std::cout << std::left << std::setw(50)
+                  << "[DTA3]. Test Init Method."
+                  << RED << "[Failed]" << RESET << std::endl;
+        std::cout << errors.str() << std::endl;
+    }
+}
+
+// Test 4: Move Constructor
+void test_move_constructor_atomic() {
+    std::stringstream errors;
+
+    size_t rows = 3;
+    size_t cols = 3;
+    DependencyTableAtomic dt1(rows, cols);
+    dt1.setDependency(0, 0, true);
+    dt1.setDependency(1, 1, true);
+    dt1.setDependency(2, 2, true);
+
+    // Move construct dt2 from dt1
+    DependencyTableAtomic dt2(std::move(dt1));
+
+    // Check dt2 has the data
+    CHECK(dt2.rows() == rows, "Move constructor should transfer correct number of rows", errors);
+    CHECK(dt2.cols() == cols, "Move constructor should transfer correct number of cols", errors);
+    CHECK(dt2.getDependency(0, 0) == true,  "Move constructor should transfer dependency at (0,0)", errors);
+    CHECK(dt2.getDependency(1, 1) == true,  "Move constructor should transfer dependency at (1,1)", errors);
+    CHECK(dt2.getDependency(2, 2) == true,  "Move constructor should transfer dependency at (2,2)", errors);
+
+    // Check dt1 is in a valid moved-from state
+    CHECK(dt1.rows() == 0, "After move, source should have rows set to 0", errors);
+    CHECK(dt1.cols() == 0, "After move, source should have cols set to 0", errors);
+
+    // Determine if the test passed or failed
+    if (errors.str().empty()) {
+        std::cout << std::left << std::setw(50)
+                  << "[DTA4]. Test Move Constructor."
+                  << GREEN << "[Passed]" << RESET << std::endl;
+    } else {
+        std::cout << std::left << std::setw(50)
+                  << "[DTA4]. Test Move Constructor."
+                  << RED << "[Failed]" << RESET << std::endl;
+        std::cout << errors.str() << std::endl;
+    }
+}
+
+// Test 5: Move Assignment Operator
+void test_move_assignment_atomic() {
+    std::stringstream errors;
+
+    size_t rows1 = 2;
+    size_t cols1 = 2;
+    DependencyTableAtomic dt1(rows1, cols1);
+    dt1.setDependency(0, 0, true);
+    dt1.setDependency(1, 1, true);
+
+    size_t rows2 = 4;
+    size_t cols2 = 4;
+    DependencyTableAtomic dt2(rows2, cols2);
+    dt2.setDependency(0, 0, true);
+    dt2.setDependency(3, 3, true);
+
+    // Move assign dt2 <- dt1
+    dt2 = std::move(dt1);
+
+    // Check dt2 has the data from dt1
+    CHECK(dt2.rows() == rows1, "Move assignment should transfer correct number of rows", errors);
+    CHECK(dt2.cols() == cols1, "Move assignment should transfer correct number of cols", errors);
+    CHECK(dt2.getDependency(0, 0) == true,  "Move assignment should transfer dependency at (0,0)", errors);
+    CHECK(dt2.getDependency(1, 1) == true,  "Move assignment should transfer dependency at (1,1)", errors);
+
+    // Check dt1 is in a valid moved-from state
+    CHECK(dt1.rows() == 0, "After move assignment, source should have rows set to 0", errors);
+    CHECK(dt1.cols() == 0, "After move assignment, source should have cols set to 0", errors);
+
+    // Ensure dt2 no longer has old data (it should be 2x2 now)
+    // Accessing (3,3) should throw
+    try {
+        dt2.getDependency(3, 3);
+        errors << RED << "Failure: Accessing (3,3) should throw after move assignment." << RESET << std::endl;
+        ++total_failures;
+    } catch (const std::out_of_range&) {
+        // Expected
+    } catch (...) {
+        errors << RED << "Failure: Unexpected exception type when accessing out-of-bounds." << RESET << std::endl;
+        ++total_failures;
+    }
+
+    // Determine if the test passed or failed
+    if (errors.str().empty()) {
+        std::cout << std::left << std::setw(50)
+                  << "[DTA5]. Test Move Assignment Operator."
+                  << GREEN << "[Passed]" << RESET << std::endl;
+    } else {
+        std::cout << std::left << std::setw(50)
+                  << "[DTA5]. Test Move Assignment Operator."
+                  << RED << "[Failed]" << RESET << std::endl;
+        std::cout << errors.str() << std::endl;
+    }
+}
+
+// Test 6: Get and Set Dependency
+void test_get_set_dependency_atomic() {
+    std::stringstream errors;
+
+    size_t rows = 3;
+    size_t cols = 3;
+    DependencyTableAtomic dt(rows, cols);
+
+    // Set some dependencies
+    dt.setDependency(0, 0, true);
+    dt.setDependency(1, 1, true);
+    dt.setDependency(2, 2, true);
+    dt.setDependency(0, 2, true);
+
+    // Verify using getDependency
+    CHECK(dt.getDependency(0, 0) == true,  "Dependency at (0,0) should be true", errors);
+    CHECK(dt.getDependency(1, 1) == true,  "Dependency at (1,1) should be true", errors);
+    CHECK(dt.getDependency(2, 2) == true,  "Dependency at (2,2) should be true", errors);
+    CHECK(dt.getDependency(0, 2) == true,  "Dependency at (0,2) should be true", errors);
+    CHECK(dt.getDependency(0, 1) == false, "Dependency at (0,1) should be false", errors);
+    CHECK(dt.getDependency(1, 0) == false, "Dependency at (1,0) should be false", errors);
+
+    // Determine if the test passed or failed
+    if (errors.str().empty()) {
+        std::cout << std::left << std::setw(50)
+                  << "[DTA6]. Test Get and Set Dependency."
+                  << GREEN << "[Passed]" << RESET << std::endl;
+    } else {
+        std::cout << std::left << std::setw(50)
+                  << "[DTA6]. Test Get and Set Dependency."
+                  << RED << "[Failed]" << RESET << std::endl;
+        std::cout << errors.str() << std::endl;
+    }
+}
+
+// Test 7: Operator Overloading
+void test_operator_overloading_atomic() {
+    std::stringstream errors;
+
+    size_t rows = 2;
+    size_t cols = 2;
+    DependencyTableAtomic dt(rows, cols);
+
+    // Use operator() to set dependencies
+    try {
+        dt(0, 0, true);
+        dt(1, 1, true);
+        dt(0, 1, false);
+        dt(1, 0, true);
+    } catch (...) {
+        errors << RED << "Failure: Operator() threw an unexpected exception during set." << RESET << std::endl;
+        ++total_failures;
+    }
+
+    // Use operator() to get dependencies
+    try {
+        CHECK(dt(0, 0) == true,  "Operator() should return true for (0,0)", errors);
+        CHECK(dt(1, 1) == true,  "Operator() should return true for (1,1)", errors);
+        CHECK(dt(0, 1) == false, "Operator() should return false for (0,1)", errors);
+        CHECK(dt(1, 0) == true,  "Operator() should return true for (1,0)", errors);
+    } catch (...) {
+        errors << RED << "Failure: Operator() threw an unexpected exception during get." << RESET << std::endl;
+        ++total_failures;
+    }
+
+    // Attempt out-of-bounds access for get
+    try {
+        dt(2, 2); // Should throw
+        errors << RED << "Failure: Accessing (2,2) should throw an exception." << RESET << std::endl;
+        ++total_failures;
+    } catch (const std::out_of_range&) {
+        // Expected
+    } catch (...) {
+        errors << RED << "Failure: Unexpected exception type when accessing out-of-bounds." << RESET << std::endl;
+        ++total_failures;
+    }
+
+    // Determine if the test passed or failed
+    if (errors.str().empty()) {
+        std::cout << std::left << std::setw(50)
+                  << "[DTA7]. Test Operator Overloading."
+                  << GREEN << "[Passed]" << RESET << std::endl;
+    } else {
+        std::cout << std::left << std::setw(50)
+                  << "[DTA7]. Test Operator Overloading."
+                  << RED << "[Failed]" << RESET << std::endl;
+        std::cout << errors.str() << std::endl;
+    }
+}
+
+// Test 8: Out of Bounds Access
+void test_out_of_bounds_atomic() {
+    std::stringstream errors;
+
+    size_t rows = 2;
+    size_t cols = 2;
+    DependencyTableAtomic dt(rows, cols);
+
+    // Operator() get out-of-bounds
+    try {
+        dt(0, 3); // Should throw
+        errors << RED << "Failure: operator()(0,3) should throw an exception." << RESET << std::endl;
+        ++total_failures;
+    } catch (const std::out_of_range&) {
+        // Expected
+    } catch (...) {
+        errors << RED << "Failure: Unexpected exception type in operator() get out-of-bounds." << RESET << std::endl;
+        ++total_failures;
+    }
+
+    // Operator() set out-of-bounds
+    try {
+        dt(3, 0, true); // Should throw
+        errors << RED << "Failure: operator()(3,0,true) should throw an exception." << RESET << std::endl;
+        ++total_failures;
+    } catch (const std::out_of_range&) {
+        // Expected
+    } catch (...) {
+        errors << RED << "Failure: Unexpected exception type in operator() set out-of-bounds." << RESET << std::endl;
+        ++total_failures;
+    }
+
+    // Determine if the test passed or failed
+    if (errors.str().empty()) {
+        std::cout << std::left << std::setw(50)
+                  << "[DTA8]. Test Out of Bounds Access."
+                  << GREEN << "[Passed]" << RESET << std::endl;
+    } else {
+        std::cout << std::left << std::setw(50)
+                  << "[DTA8]. Test Out of Bounds Access."
+                  << RED << "[Failed]" << RESET << std::endl;
+        std::cout << errors.str() << std::endl;
+    }
+}
+
 int main(int argc, char *argv[]) {
     std::cout << "Inside Test.\n" << std::endl;
 
@@ -516,14 +854,14 @@ int main(int argc, char *argv[]) {
     std::cout << "Matrix Size: (" << data.rows() << "," << data.cols() << ")" << std::endl;
     */
 
-    std::cout << "Testing Matrix Methods." << std::endl;
+    std::cout << YELLOW << "Testing Matrix Methods." << RESET << std::endl;
 
     // Run matrix_t test functions
     test_operator_access();
     test_get_set();
     test_save();
 
-    std::cout << "\nTesting DependencyTable Methods." << std::endl;
+    std::cout << YELLOW << "\nTesting DependencyTable Methods." << RESET << std::endl;
 
     // Run DependencyTable test functions
     test_default_constructor();
@@ -534,6 +872,18 @@ int main(int argc, char *argv[]) {
     test_get_set_dependency();
     test_operator_overloading();
     test_out_of_bounds();
+
+    std::cout << YELLOW << "\nTesting DependencyTableAtomic Methods." << RESET << std::endl;
+
+    // Run DependencyTableAtomic test functions
+    test_default_constructor_atomic();
+    test_parameterized_constructor_atomic();
+    test_init_atomic();
+    test_move_constructor_atomic();
+    test_move_assignment_atomic();
+    test_get_set_dependency_atomic();
+    test_operator_overloading_atomic();
+    test_out_of_bounds_atomic();
 
     std::cout << std::endl;
 
