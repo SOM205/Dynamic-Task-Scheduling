@@ -5,6 +5,8 @@
 #include <string>
 #include <stdexcept>
 
+#include <atomic>
+
 template <class T>
 class matrix_t {
 private:
@@ -189,6 +191,10 @@ class DependencyTable {
         m = total_task_rows;
         n = total_task_cols;
         data = new bool[m * n]();
+
+        for (size_t i = 0; i < m * n; ++i) {
+            data[i] = false;
+        }
     }
 
     // Retrieves the dependency value at (i, j)
@@ -233,4 +239,132 @@ class DependencyTable {
     size_t rows() const { return m; }
     size_t cols() const { return n; }
 
+};
+
+class DependencyTableAtomic {
+    size_t m;                   // Number of rows
+    size_t n;                   // Number of columns
+    std::atomic<bool>* data;    // Pointer to dynamically allocated atomic<bool> array
+
+public:
+    // Default constructor
+    DependencyTableAtomic() : m(0), n(0), data(nullptr) {}
+
+    // Constructor: Initializes the dependency table with given rows and columns
+    DependencyTableAtomic(size_t total_task_rows, size_t total_task_cols)
+        : m(0), n(0), data(nullptr)
+    {
+        init(total_task_rows, total_task_cols);
+    }
+
+    // Destructor: Frees the dynamically allocated memory
+    ~DependencyTableAtomic() {
+        delete[] data;
+    }
+
+    // Deleted copy constructor and copy assignment to prevent accidental copying
+    DependencyTableAtomic(const DependencyTableAtomic&) = delete;
+    DependencyTableAtomic& operator=(const DependencyTableAtomic&) = delete;
+
+    // Move constructor
+    DependencyTableAtomic(DependencyTableAtomic&& other) noexcept
+        : m(other.m), n(other.n), data(other.data)
+    {
+        other.m = 0;
+        other.n = 0;
+        other.data = nullptr;
+    }
+
+    // Move assignment operator
+    DependencyTableAtomic& operator=(DependencyTableAtomic&& other) noexcept {
+        if (this != &other) {
+            delete[] data;
+            m = other.m;
+            n = other.n;
+            data = other.data;
+
+            other.m = 0;
+            other.n = 0;
+            other.data = nullptr;
+        }
+        return *this;
+    }
+
+    // Initializes the dependency table with given rows and columns
+    void init(size_t total_task_rows, size_t total_task_cols) {
+        // Clean up existing data if any
+        delete[] data;
+
+        m = total_task_rows;
+        n = total_task_cols;
+
+        // Allocate new storage for atomic<bool>
+        data = new std::atomic<bool>[m * n];
+
+        // Initialize all values to false
+        for (size_t i = 0; i < m * n; ++i) {
+            data[i].store(false, std::memory_order_relaxed);
+        }
+    }
+
+    // Retrieves the dependency value at (i, j) using an atomic load
+    inline bool getDependency(size_t i, size_t j) const {
+        size_t idx = i * n + j;
+        // Acquire ordering to ensure we read the latest value from any writer
+        return data[idx].load(std::memory_order_acquire);
+    }
+
+    // Sets the dependency value at (i, j) using an atomic store
+    inline void setDependency(size_t i, size_t j, bool value) {
+        size_t idx = i * n + j;
+        // Release ordering to ensure that prior writes in this thread are visible
+        // to other threads that subsequently acquire this location
+        data[idx].store(value, std::memory_order_release);
+    }
+
+    // Overloaded operator() for safe indexing (read)
+    bool operator()(size_t i, size_t j) const {
+        if (i >= m || j >= n) {
+            throw std::out_of_range("Index out of bounds: (" + std::to_string(i)
+                                    + ", " + std::to_string(j) + ")");
+        }
+        return getDependency(i, j);
+    }
+
+    // Overloaded operator() for safe setting (write)
+    void operator()(size_t i, size_t j, bool value) {
+        if (i >= m || j >= n) {
+            throw std::out_of_range("Index out of bounds: (" + std::to_string(i)
+                                    + ", " + std::to_string(j) + ")");
+        }
+        setDependency(i, j, value);
+    }
+
+    // Prints the dependency table
+    void printDependencyTable() const {
+        for (size_t i = 0; i < m; ++i) {
+            for (size_t j = 0; j < n; ++j) {
+                // For printing, an acquire load ensures we see the latest state
+                bool val = data[i * n + j].load(std::memory_order_acquire);
+                std::cout << (val ? "1 " : "0 ");
+            }
+            std::cout << "\n";
+        }
+    }
+
+    // Accessors for rows and columns
+    size_t rows() const { return m; }
+    size_t cols() const { return n; }
+};
+
+struct Task {
+    unsigned char type;
+    unsigned char priority;
+    bool enq_nxt_t1;
+    size_t row_start;
+    size_t row_end;
+    size_t col_start;
+    size_t col_end;
+    size_t chunk_idx_i;
+    size_t chunk_idx_j;
 };
