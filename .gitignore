@@ -6,3 +6,6 @@ build/
 
 # Ignore executable files
 *.out
+
+# Ignore VS Code settings folder
+.vscode/
