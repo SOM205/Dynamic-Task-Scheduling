@@ -5,6 +5,9 @@
 #include <string>
 #include <stdexcept>
 
+#include <cmath>
+#include <algorithm>
+
 #include <atomic>
 
 template <class T>
@@ -367,4 +370,122 @@ struct Task {
     size_t col_end;
     size_t chunk_idx_i;
     size_t chunk_idx_j;
+};
+
+class TaskTable {
+private:
+    int m;                     // number of task rows
+    int n;                     // number of task columns
+    std::vector<Task*> data;      // vector holding pointers to Task objects
+
+public:
+    TaskTable()
+        : m(0), n(0)
+    {
+        // 'data' is initially empty.
+    }
+
+    // Parameterized constructor that calls init().
+    template <typename T>
+    TaskTable(int total_task_rows, int total_task_cols, int alpha, int beta, matrix_t<T>& mat)
+        : m(0), n(0)
+    {
+        init(total_task_rows, total_task_cols, alpha, beta, mat);
+    }
+
+    ~TaskTable() {
+        for (Task* t : data) {
+            delete t;
+        }
+    }
+
+    // Disallow copy construction and copy assignment.
+    TaskTable(const TaskTable&) = delete;
+    TaskTable& operator=(const TaskTable&) = delete;
+
+    // (Optional) Use default move construction and move assignment.
+    TaskTable(TaskTable&&) noexcept = default;
+    TaskTable& operator=(TaskTable&&) noexcept = default;
+
+    template <typename T>
+    void init(int total_task_rows, int total_task_cols, int alpha, int beta, matrix_t<T>& mat) {
+        // Delete any previously allocated tasks.
+        for (Task* t : data) {
+            delete t;
+        }
+        data.clear();
+
+        m = total_task_rows;
+        n = total_task_cols;
+        data.resize(m * n, nullptr);
+
+        int beta_div_alpha = beta / alpha;
+
+        int ctr = 1;
+        for (int i = 0; i < m; ++i) {
+            for (int j = 0; j < n; ++j) {
+                Task* new_task = new Task();
+
+                // Set the type and possibly the enq_nxt_t1 flag based on the indices and beta_by_alpha.
+                if (i * beta_div_alpha <= j && j < (i+1) * beta_div_alpha){
+                    new_task->type = 1;
+                    ctr = i + 1;
+                } else {
+                    new_task->type = 2;
+                    if (i == ctr && ((i-1) * beta_div_alpha <= j && j < i * beta_div_alpha)){
+                        new_task->enq_nxt_t1 = true;
+                    } else {
+                        new_task->enq_nxt_t1 = false;
+                    }
+                }
+
+                // If j is outside the designated range, free new_task and leave the cell as nullptr.
+                if (j >= (i+1) * beta_div_alpha) {
+                    delete new_task;
+                    continue;
+                }
+
+                // Set the boundaries for the task.
+                new_task->row_start   = alpha * j + 1;
+                new_task->row_end     = std::min(alpha *(j + 1) + 1, mat.rows());
+                new_task->col_start   = beta * i + 1;
+                new_task->col_end     = std::min(beta  *(i + 1) + 1, mat.rows());
+                new_task->chunk_idx_i = i;
+                new_task->chunk_idx_j = j;
+
+                // Store the task pointer in the vector.
+                data[i * n + j] = new_task;
+            }
+        }
+    }
+
+    inline Task* getTask(int i, int j) const {
+        return data[i * n + j];
+    }
+
+    // Overloaded operator() for accessing the task at (i, j) with bounds checking.
+    Task* operator()(int i, int j) const {
+        if (i >= m || j >= n)
+            throw std::out_of_range("Index out of bounds in TaskTable::operator()");
+        return data[i * n + j];
+    }
+
+    // Prints the task table.
+    // For each cell, it prints the task type (or "N" if the pointer is nullptr).
+    void display() const {
+        for (int i = 0; i < m; ++i) {
+            for (int j = 0; j < n; ++j) {
+                Task* t = data[i * n + j];
+                if (t)
+                    std::cout << static_cast<int>(t->type) << " ";
+                else
+                    std::cout << "N ";
+            }
+            std::cout << "\n";
+        }
+    }
+
+    // Accessors for the number of rows and columns.
+    int rows() const { return m; }
+    int cols() const { return n; }
 };
