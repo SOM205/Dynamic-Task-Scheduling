@@ -5,10 +5,54 @@
 #include <string>
 #include <stdexcept>
 
+#include <chrono>
+#include <functional>
+#include <type_traits>
+
 #include <cmath>
 #include <algorithm>
 
 #include <atomic>
+
+// Helper function to get a string representation of the time unit.
+template <typename Duration>
+constexpr const char* get_time_unit() {
+    if constexpr (std::is_same_v<Duration, std::chrono::nanoseconds>) {
+        return "nanoseconds";
+    } else if constexpr (std::is_same_v<Duration, std::chrono::microseconds>) {
+        return "microseconds";
+    } else if constexpr (std::is_same_v<Duration, std::chrono::milliseconds>) {
+        return "milliseconds";
+    } else if constexpr (std::is_same_v<Duration, std::chrono::seconds>) {
+        return "seconds";
+    } else {
+        return "time units";
+    }
+}
+
+// Function to measure execution time of a given function
+// The default is std::chrono::nanoseconds.
+template <typename TimeUnit = std::chrono::nanoseconds, typename Func, typename... Args>
+auto measure_exec_time(Func&& func, Args&&... args) {
+    auto start = std::chrono::high_resolution_clock::now();
+
+    // Handle functions that return void separately.
+    if constexpr (std::is_void_v<std::invoke_result_t<Func, Args...>>) {
+        std::invoke(std::forward<Func>(func), std::forward<Args>(args)...);
+        auto end = std::chrono::high_resolution_clock::now();
+        auto elapsed = std::chrono::duration_cast<TimeUnit>(end - start);
+        std::cout << "Time elapsed: " << elapsed.count() << " " 
+                  << get_time_unit<TimeUnit>() << "\n";
+        // No value is returned.
+    } else {
+        auto result = std::invoke(std::forward<Func>(func), std::forward<Args>(args)...);
+        auto end = std::chrono::high_resolution_clock::now();
+        auto elapsed = std::chrono::duration_cast<TimeUnit>(end - start);
+        std::cout << "Time elapsed: " << elapsed.count() << " " 
+                  << get_time_unit<TimeUnit>() << "\n";
+        return result;
+    }
+}
 
 template <class T>
 class matrix_t {
