@@ -633,3 +633,138 @@ class CircularQueueMtx {
         return pop_front();
     }
 };
+
+template<class T>
+class CircularQueueAtomic {
+    T* buffer;          // Raw array storage for elements.
+    const size_t capacity;    // Maximum number of elements allowed.
+
+    // Two atomic counters (which may be negative) track the logical indices.
+    std::atomic<int64_t> left;  // Points to the first valid element.
+    std::atomic<int64_t> right; // Points to one past the last valid element.
+
+    // A mutex used only for query operations.
+    mutable std::mutex query_mutex;
+    
+public:
+    // Constructs the deque with the given capacity.
+    // (Capacity is the maximum number of elements that can be stored.)
+    explicit CircularQueueAtomic(size_t cap)
+      : capacity(cap), left(0), right(0)
+    {
+        // Allocate a raw array for storage.
+        buffer = new T[capacity];
+    }
+
+    ~CircularQueueAtomic() {
+        delete[] buffer;
+    }
+
+    // Returns true if the deque is empty.
+    bool empty() const {
+        std::lock_guard<std::mutex> lock(query_mutex);
+        return (right.load(std::memory_order_acquire) - left.load(std::memory_order_acquire)) == 0;
+    }
+
+    // Returns true if the deque is full.
+    bool full() const {
+        std::lock_guard<std::mutex> lock(query_mutex);
+        return (right.load(std::memory_order_acquire) - left.load(std::memory_order_acquire)) >= static_cast<int64_t>(capacity);
+    }
+
+    // Returns the current number of elements.
+    size_t size() const {
+        std::lock_guard<std::mutex> lock(query_mutex);
+        return static_cast<size_t>(right.load(std::memory_order_acquire) - left.load(std::memory_order_acquire));
+    }
+
+    // ---- Lock-free update methods (using atomics & compare_exchange) ----
+
+    // push_back: Append an element at the back.
+    // Returns false if the deque is full.
+    bool push_back(const T &value) {
+        while (true) {
+            int64_t current_right = right.load(std::memory_order_relaxed);
+            int64_t current_left  = left.load(std::memory_order_acquire);
+            if ((current_right - current_left) >= static_cast<int64_t>(capacity))
+                return false;  // full
+
+            if (right.compare_exchange_weak(current_right, current_right + 1,
+                                            std::memory_order_acq_rel, std::memory_order_relaxed))
+            {
+                size_t index = static_cast<size_t>(current_right % capacity);
+                buffer[index] = value;
+                return true;
+            }
+        }
+    }
+
+    // push_front: Insert an element at the front.
+    // Returns false if the deque is full.
+    bool push_front(const T &value) {
+        while (true) {
+            int64_t current_left  = left.load(std::memory_order_relaxed);
+            int64_t current_right = right.load(std::memory_order_acquire);
+            if ((current_right - current_left) >= static_cast<int64_t>(capacity))
+                return false;  // full
+
+            int64_t new_left = current_left - 1;
+            if (left.compare_exchange_weak(current_left, new_left,
+                                           std::memory_order_acq_rel, std::memory_order_relaxed))
+            {
+                size_t index = static_cast<size_t>(((new_left % capacity) + capacity) % capacity);
+                buffer[index] = value;
+                return true;
+            }
+        }
+    }
+
+    // pop_front: Remove and return an element from the front.
+    // Returns std::nullopt if the deque is empty.
+    std::optional<T> pop_front() {
+        while (true) {
+            int64_t current_left  = left.load(std::memory_order_relaxed);
+            int64_t current_right = right.load(std::memory_order_acquire);
+            if (current_left == current_right)
+                return std::nullopt;  // empty
+
+            if (left.compare_exchange_weak(current_left, current_left + 1,
+                                           std::memory_order_acq_rel, std::memory_order_relaxed))
+            {
+                size_t index = static_cast<size_t>(((current_left % capacity) + capacity) % capacity);
+                T value = buffer[index];
+                return value;
+            }
+        }
+    }
+
+    // pop_back: Remove and return an element from the back.
+    // Returns std::nullopt if the deque is empty.
+    std::optional<T> pop_back() {
+        while (true) {
+            int64_t current_right = right.load(std::memory_order_relaxed);
+            int64_t current_left  = left.load(std::memory_order_acquire);
+            if (current_left == current_right)
+                return std::nullopt;  // empty
+
+            int64_t new_right = current_right - 1;
+            if (right.compare_exchange_weak(current_right, new_right,
+                                            std::memory_order_acq_rel, std::memory_order_relaxed))
+            {
+                size_t index = static_cast<size_t>(((new_right % capacity) + capacity) % capacity);
+                T value = buffer[index];
+                return value;
+            }
+        }
+    }
+
+    // push: Alias for push_back so that the deque can be used as a normal FIFO queue.
+    bool push(const T &value) {
+        return push_back(value);
+    }
+
+    // pop: Alias for pop_front so that the deque can be used as a normal FIFO queue.
+    std::optional<T> pop() {
+        return pop_front();
+    }
+};
