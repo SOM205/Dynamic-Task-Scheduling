@@ -12,6 +12,8 @@
 #include <cmath>
 #include <algorithm>
 
+#include <mutex>
+#include <optional>
 #include <atomic>
 
 // Helper function to get a string representation of the time unit.
@@ -532,4 +534,102 @@ public:
     // Accessors for the number of rows and columns.
     int rows() const { return m; }
     int cols() const { return n; }
+};
+
+template <class T>
+class CircularQueueMtx {
+    std::vector<T> buffer;      // Internal storage.
+    const size_t capacity;      // Maximum number of elements.
+    size_t front;               // Index of the first element.
+    size_t rear;                // Index one past the last element.
+    size_t count;               // Number of elements in the queue.
+    mutable std::mutex mutex;   // Mutex for thread-safety.
+
+    public:
+    // Construct a circular queue with fixed capacity.
+    explicit CircularQueueMtx(size_t capacity)
+        : buffer(capacity), capacity(capacity),
+          front(0), rear(0), count(0)
+    { }
+
+    // Returns true if the queue is empty.
+    bool empty() const {
+        std::lock_guard<std::mutex> lock(mutex);
+        return count == 0;
+    }
+
+    // Returns true if the queue is full.
+    bool full() const {
+        std::lock_guard<std::mutex> lock(mutex);
+        return count == capacity;
+    }
+
+    // Returns the current number of elements.
+    size_t size() const {
+        std::lock_guard<std::mutex> lock(mutex);
+        return count;
+    }
+
+    // Push an element at the front of the queue.
+    // Returns true if the operation was successful (i.e. the queue wasn’t full).
+    bool push_front(const T &value) {
+        std::lock_guard<std::mutex> lock(mutex);
+        if (count == capacity) {
+            return false;  // Queue is full.
+        }
+        // Move front backward (circularly) and store the value.
+        front = (front + capacity - 1) % capacity;
+        buffer[front] = value;
+        ++count;
+        return true;
+    }
+
+    // Push an element at the back of the queue.
+    // Returns true if the operation was successful (i.e. the queue wasn’t full).
+    bool push_back(const T &value) {
+        std::lock_guard<std::mutex> lock(mutex);
+        if (count == capacity) {
+            return false;  // Queue is full.
+        }
+        buffer[rear] = value;
+        rear = (rear + 1) % capacity;
+        ++count;
+        return true;
+    }
+
+    // An alias for push_back.
+    inline bool push(const T &value) {
+        return push_back(value);
+    }
+
+    // Pop an element from the front.
+    // If the queue is empty, returns std::nullopt.
+    std::optional<T> pop_front() {
+        std::lock_guard<std::mutex> lock(mutex);
+        if (count == 0) {
+            return std::nullopt;  // Queue is empty.
+        }
+        T value = buffer[front];
+        front = (front + 1) % capacity;
+        --count;
+        return value;
+    }
+
+    // Pop an element from the back.
+    // If the queue is empty, returns std::nullopt.
+    std::optional<T> pop_back() {
+        std::lock_guard<std::mutex> lock(mutex);
+        if (count == 0) {
+            return std::nullopt;  // Queue is empty.
+        }
+        rear = (rear + capacity - 1) % capacity;
+        T value = buffer[rear];
+        --count;
+        return value;
+    }
+
+    // An alias for pop_front.
+    std::optional<T> pop() {
+        return pop_front();
+    }
 };
