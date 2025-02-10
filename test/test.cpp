@@ -4,7 +4,9 @@
 #include <fstream>
 #include <sstream>    // Added for std::stringstream
 #include <cstdlib>    // Added for std::remove
-#include "bn2.h"     // Include the matrix_t class
+#include "bn2.h"     
+
+#include <thread>
 
 // Define color codes
 #define RED "\033[31m"
@@ -842,17 +844,188 @@ void test_out_of_bounds_atomic() {
     }
 }
 
+// ====================== CircularQueueMtx Tests =========================== //
+
+// Test Case 1: Test Empty Queue and Size
+void test_queue_empty_and_size() {
+    std::stringstream errors;
+    CircularQueueMtx<int> q(5);
+
+    CHECK(q.empty(), "Queue should be empty initially", errors);
+    CHECK(q.size() == 0, "Queue size should be 0 initially", errors);
+
+    if (errors.str().empty()) {
+         std::cout << std::left << std::setw(50)
+                   << "[QueueTest1] Test Empty and Size"
+                   << GREEN << "[Passed]" << RESET << std::endl;
+    } else {
+         std::cout << std::left << std::setw(50)
+                   << "[QueueTest1] Test Empty and Size"
+                   << RED << "[Failed]" << RESET << std::endl;
+         std::cout << errors.str();
+         total_failures++;
+    }
+}
+
+// Test Case 2: Test push_back and pop_front (FIFO behavior)
+void test_queue_push_pop_fifo() {
+    std::stringstream errors;
+    CircularQueueMtx<int> queue(5);
+    // Push several elements at the back.
+    CHECK(queue.push_back(1), "Push_back 1 should succeed", errors);
+    CHECK(queue.push_back(2), "Push_back 2 should succeed", errors);
+    CHECK(queue.push_back(3), "Push_back 3 should succeed", errors);
+    CHECK(queue.size() == 3, "Queue size should be 3 after three pushes", errors);
+    CHECK(!queue.empty(), "Queue should not be empty after pushes", errors);
+
+    // Pop the elements from the front (FIFO).
+    auto a = queue.pop_front();
+    CHECK(a.has_value() && a.value() == 1, "First pop_front should return 1", errors);
+    auto b = queue.pop_front();
+    CHECK(b.has_value() && b.value() == 2, "Second pop_front should return 2", errors);
+    auto c = queue.pop_front();
+    CHECK(c.has_value() && c.value() == 3, "Third pop_front should return 3", errors);
+    CHECK(queue.empty(), "Queue should be empty after popping all elements", errors);
+
+    // Additional pop from empty queue should return nullopt.
+    auto d = queue.pop_front();
+    CHECK(!d.has_value(), "pop_front on empty queue should return nullopt", errors);
+
+    if (errors.str().empty()) {
+         std::cout << std::left << std::setw(50)
+                   << "[QueueTest2] Test Push_Back and Pop_Front FIFO"
+                   << GREEN << "[Passed]" << RESET << std::endl;
+    } else {
+         std::cout << std::left << std::setw(50)
+                   << "[QueueTest2] Test Push_Back and Pop_Front FIFO"
+                   << RED << "[Failed]" << RESET << std::endl;
+         std::cout << errors.str();
+         total_failures++;
+    }
+}
+
+// Test Case 3: Test push_front and pop_back (Reverse order)
+void test_queue_push_front_pop_back() {
+    std::stringstream errors;
+    CircularQueueMtx<int> queue(5);
+    // Insert elements using push_front.
+    CHECK(queue.push_front(10), "Push_front 10 should succeed", errors);
+    CHECK(queue.push_front(20), "Push_front 20 should succeed", errors);
+    CHECK(queue.push_front(30), "Push_front 30 should succeed", errors);
+    // The elements (in order of insertion via push_front) end up as: 30, 20, 10.
+    // Popping from the back should return the element inserted first (i.e. 10, then 20, then 30).
+    auto a = queue.pop_back();
+    CHECK(a.has_value() && a.value() == 10, "First pop_back should return 10", errors);
+    auto b = queue.pop_back();
+    CHECK(b.has_value() && b.value() == 20, "Second pop_back should return 20", errors);
+    auto c = queue.pop_back();
+    CHECK(c.has_value() && c.value() == 30, "Third pop_back should return 30", errors);
+    CHECK(queue.empty(), "Queue should be empty after pop_back operations", errors);
+
+    if (errors.str().empty()) {
+         std::cout << std::left << std::setw(50)
+                   << "[QueueTest3] Test Push_Front and Pop_Back"
+                   << GREEN << "[Passed]" << RESET << std::endl;
+    } else {
+         std::cout << std::left << std::setw(50)
+                   << "[QueueTest3] Test Push_Front and Pop_Back"
+                   << RED << "[Failed]" << RESET << std::endl;
+         std::cout << errors.str();
+         total_failures++;
+    }
+}
+
+// Test Case 4: Test Full Queue Behavior
+void test_queue_full() {
+    std::stringstream errors;
+    CircularQueueMtx<int> queue(3);
+    CHECK(queue.push_back(1), "Push_back 1 should succeed", errors);
+    CHECK(queue.push_back(2), "Push_back 2 should succeed", errors);
+    CHECK(queue.push_back(3), "Push_back 3 should succeed", errors);
+    CHECK(queue.full(), "Queue should be full after three pushes", errors);
+
+    // Attempt additional pushes; they must fail.
+    CHECK(!queue.push_back(4), "Push_back 4 should fail on full queue", errors);
+    CHECK(!queue.push_front(5), "Push_front 5 should fail on full queue", errors);
+
+    // After a pop, the queue is no longer full.
+    auto a = queue.pop_front();
+    CHECK(a.has_value(), "pop_front should succeed on full queue", errors);
+    CHECK(!queue.full(), "Queue should not be full after a pop", errors);
+
+    if (errors.str().empty()) {
+         std::cout << std::left << std::setw(50)
+                   << "[QueueTest4] Test Full Queue Behavior"
+                   << GREEN << "[Passed]" << RESET << std::endl;
+    } else {
+         std::cout << std::left << std::setw(50)
+                   << "[QueueTest4] Test Full Queue Behavior"
+                   << RED << "[Failed]" << RESET << std::endl;
+         std::cout << errors.str();
+         total_failures++;
+    }
+}
+
+// Test Case 5: Multi-threaded Producer/Consumer Operations
+void test_queue_multi_threaded() {
+    std::stringstream errors;
+    const size_t capacity = 50;
+    const int num_elements = 1000;
+    CircularQueueMtx<int> queue(capacity);
+    std::atomic<bool> done{false};
+    std::atomic<int> produced{0};
+    std::atomic<int> consumed{0};
+
+    // Producer thread: push numbers into the queue.
+    auto producer = [&]() {
+         for (int i = 0; i < num_elements; ++i) {
+              while (!queue.push_back(i)) {
+                   std::this_thread::yield();
+              }
+              produced.fetch_add(1, std::memory_order_relaxed);
+         }
+         done = true;
+    };
+
+    // Consumer thread: pop numbers from the queue.
+    auto consumer = [&]() {
+         while (!done || !queue.empty()) {
+              auto value = queue.pop_front();
+              if (value.has_value()) {
+                   consumed.fetch_add(1, std::memory_order_relaxed);
+              } else {
+                   std::this_thread::yield();
+              }
+         }
+    };
+
+    std::thread prodThread(producer);
+    std::thread consThread(consumer);
+    prodThread.join();
+    consThread.join();
+
+    CHECK(produced.load(std::memory_order_relaxed) == num_elements,
+          "Produced count should equal num_elements", errors);
+    CHECK(consumed.load(std::memory_order_relaxed) == num_elements,
+          "Consumed count should equal num_elements", errors);
+
+    if (errors.str().empty()) {
+         std::cout << std::left << std::setw(50)
+                   << "[QueueTest5] Test Multi-threaded Operations"
+                   << GREEN << "[Passed]" << RESET << std::endl;
+    } else {
+         std::cout << std::left << std::setw(50)
+                   << "[QueueTest5] Test Multi-threaded Operations"
+                   << RED << "[Failed]" << RESET << std::endl;
+         std::cout << errors.str();
+         total_failures++;
+    }
+}
+
+
+
 int main(int argc, char *argv[]) {
     std::cout << "Inside Test.\n" << std::endl;
-
-    /*
-    if (argc < 2) {
-        std::cerr << "Usage: " << argv[0] << " <filename>" << std::endl;
-        return EXIT_FAILURE;
-    }
-    matrix_t<double> data(argv[1]);
-    std::cout << "Matrix Size: (" << data.rows() << "," << data.cols() << ")" << std::endl;
-    */
 
     std::cout << YELLOW << "Testing Matrix Methods." << RESET << std::endl;
 
@@ -884,6 +1057,15 @@ int main(int argc, char *argv[]) {
     test_get_set_dependency_atomic();
     test_operator_overloading_atomic();
     test_out_of_bounds_atomic();
+
+    std::cout << YELLOW << "\nStarting CircularQueueMtx Test Cases" << RESET << std::endl;
+
+    test_queue_empty_and_size();
+    test_queue_push_pop_fifo();
+    test_queue_push_front_pop_back();
+    test_queue_full();
+    test_queue_multi_threaded();
+
 
     std::cout << std::endl;
 
