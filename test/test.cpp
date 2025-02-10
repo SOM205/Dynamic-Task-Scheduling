@@ -56,10 +56,10 @@ void test_operator_access() {
 
     // Determine if the test passed or failed
     if (errors.str().empty()) {
-        std::cout << std::left << std::setw(50) << "[MT1]. Test Operator Access."
+        std::cout << std::left << std::setw(60) << "[MT1]. Test Operator Access."
                   << GREEN << "[Passed]" << RESET << std::endl;
     } else {
-        std::cout << std::left << std::setw(50) << "[MT1]. Test Operator Access."
+        std::cout << std::left << std::setw(60) << "[MT1]. Test Operator Access."
                   << RED << "[Failed]" << RESET << std::endl;
         // Print the collected error messages
         std::cout << errors.str() << std::endl;
@@ -90,10 +90,10 @@ void test_get_set() {
 
     // Determine if the test passed or failed
     if (errors.str().empty()) {
-        std::cout << std::left << std::setw(50) << "[MT2]. Test Getter/Setter Methods."
+        std::cout << std::left << std::setw(60) << "[MT2]. Test Getter/Setter Methods."
                   << GREEN << "[Passed]" << RESET << std::endl;
     } else {
-        std::cout << std::left << std::setw(50) << "[MT2]. Test Getter/Setter Methods."
+        std::cout << std::left << std::setw(60) << "[MT2]. Test Getter/Setter Methods."
                   << RED << "[Failed]" << RESET << std::endl;
         // Print the collected error messages
         std::cout << errors.str() << std::endl;
@@ -150,10 +150,10 @@ void test_save() {
 
     // Determine if the test passed or failed
     if (errors.str().empty()) {
-        std::cout << std::left << std::setw(50) << "[MT3]. Test Matrix Save Method."
+        std::cout << std::left << std::setw(60) << "[MT3]. Test Matrix Save Method."
                   << GREEN << "[Passed]" << RESET << std::endl;
     } else {
-        std::cout << std::left << std::setw(50) << "[MT3]. Test Matrix Save Method."
+        std::cout << std::left << std::setw(60) << "[MT3]. Test Matrix Save Method."
                   << RED << "[Failed]" << RESET << std::endl;
         // Print the collected error messages
         std::cout << errors.str()<< std::endl;
@@ -177,10 +177,10 @@ void test_default_constructor() {
 
     // Determine if the test passed or failed
     if (errors.str().empty()) {
-        std::cout << std::left << std::setw(50) << "[DT1]. Test Default Constructor."
+        std::cout << std::left << std::setw(60) << "[DT1]. Test Default Constructor."
                   << GREEN << "[Passed]" << RESET << std::endl;
     } else {
-        std::cout << std::left << std::setw(50) << "[DT1]. Test Default Constructor."
+        std::cout << std::left << std::setw(60) << "[DT1]. Test Default Constructor."
                   << RED << "[Failed]" << RESET << std::endl;
         std::cout << errors.str()<< std::endl;
     }
@@ -207,10 +207,10 @@ void test_parameterized_constructor() {
 
     // Determine if the test passed or failed
     if (errors.str().empty()) {
-        std::cout << std::left << std::setw(50) << "[DT2]. Test Parameterized Constructor."
+        std::cout << std::left << std::setw(60) << "[DT2]. Test Parameterized Constructor."
                   << GREEN << "[Passed]" << RESET << std::endl;
     } else {
-        std::cout << std::left << std::setw(50) << "[DT2]. Test Parameterized Constructor."
+        std::cout << std::left << std::setw(60) << "[DT2]. Test Parameterized Constructor."
                   << RED << "[Failed]" << RESET << std::endl;
         std::cout << errors.str()<< std::endl;
     }
@@ -254,10 +254,10 @@ void test_init() {
 
     // Determine if the test passed or failed
     if (errors.str().empty()) {
-        std::cout << std::left << std::setw(50) << "[DT3]. Test Init Method."
+        std::cout << std::left << std::setw(60) << "[DT3]. Test Init Method."
                   << GREEN << "[Passed]" << RESET << std::endl;
     } else {
-        std::cout << std::left << std::setw(50) << "[DT3]. Test Init Method."
+        std::cout << std::left << std::setw(60) << "[DT3]. Test Init Method."
                   << RED << "[Failed]" << RESET << std::endl;
         std::cout << errors.str()<< std::endl;
     }
@@ -290,10 +290,10 @@ void test_move_constructor() {
 
     // Determine if the test passed or failed
     if (errors.str().empty()) {
-        std::cout << std::left << std::setw(50) << "[DT4]. Test Move Constructor."
+        std::cout << std::left << std::setw(60) << "[DT4]. Test Move Constructor."
                   << GREEN << "[Passed]" << RESET << std::endl;
     } else {
-        std::cout << std::left << std::setw(50) << "[DT4]. Test Move Constructor."
+        std::cout << std::left << std::setw(60) << "[DT4]. Test Move Constructor."
                   << RED << "[Failed]" << RESET << std::endl;
         std::cout << errors.str()<< std::endl;
     }
@@ -343,10 +343,10 @@ void test_move_assignment() {
 
     // Determine if the test passed or failed
     if (errors.str().empty()) {
-        std::cout << std::left << std::setw(50) << "[DT5]. Test Move Assignment Operator."
+        std::cout << std::left << std::setw(60) << "[DT5]. Test Move Assignment Operator."
                   << GREEN << "[Passed]" << RESET << std::endl;
     } else {
-        std::cout << std::left << std::setw(50) << "[DT5]. Test Move Assignment Operator."
+        std::cout << std::left << std::setw(60) << "[DT5]. Test Move Assignment Operator."
                   << RED << "[Failed]" << RESET << std::endl;
         std::cout << errors.str()<< std::endl;
     }
@@ -376,10 +376,10 @@ void test_get_set_dependency() {
 
     // Determine if the test passed or failed
     if (errors.str().empty()) {
-        std::cout << std::left << std::setw(50) << "[DT6]. Test Get and Set Dependency."
+        std::cout << std::left << std::setw(60) << "[DT6]. Test Get and Set Dependency."
                   << GREEN << "[Passed]" << RESET << std::endl;
     } else {
-        std::cout << std::left << std::setw(50) << "[DT6]. Test Get and Set Dependency."
+        std::cout << std::left << std::setw(60) << "[DT6]. Test Get and Set Dependency."
                   << RED << "[Failed]" << RESET << std::endl;
         std::cout << errors.str()<< std::endl;
     }
@@ -429,10 +429,10 @@ void test_operator_overloading() {
 
     // Determine if the test passed or failed
     if (errors.str().empty()) {
-        std::cout << std::left << std::setw(50) << "[DT7]. Test Operator Overloading."
+        std::cout << std::left << std::setw(60) << "[DT7]. Test Operator Overloading."
                   << GREEN << "[Passed]" << RESET << std::endl;
     } else {
-        std::cout << std::left << std::setw(50) << "[DT7]. Test Operator Overloading."
+        std::cout << std::left << std::setw(60) << "[DT7]. Test Operator Overloading."
                   << RED << "[Failed]" << RESET << std::endl;
         std::cout << errors.str()<< std::endl;
     }
@@ -498,10 +498,10 @@ void test_out_of_bounds() {
 
     // Determine if the test passed or failed
     if (errors.str().empty()) {
-        std::cout << std::left << std::setw(50) << "[DT8]. Test Out of Bounds Access."
+        std::cout << std::left << std::setw(60) << "[DT8]. Test Out of Bounds Access."
                   << GREEN << "[Passed]" << RESET << std::endl;
     } else {
-        std::cout << std::left << std::setw(50) << "[DT8]. Test Out of Bounds Access."
+        std::cout << std::left << std::setw(60) << "[DT8]. Test Out of Bounds Access."
                   << RED << "[Failed]" << RESET << std::endl;
         std::cout << errors.str()<< std::endl;
     }
@@ -521,11 +521,11 @@ void test_default_constructor_atomic() {
 
     // Determine if the test passed or failed
     if (errors.str().empty()) {
-        std::cout << std::left << std::setw(50)
+        std::cout << std::left << std::setw(60)
                   << "[DTA1]. Test Default Constructor."
                   << GREEN << "[Passed]" << RESET << std::endl;
     } else {
-        std::cout << std::left << std::setw(50)
+        std::cout << std::left << std::setw(60)
                   << "[DTA1]. Test Default Constructor."
                   << RED << "[Failed]" << RESET << std::endl;
         std::cout << errors.str() << std::endl;
@@ -554,11 +554,11 @@ void test_parameterized_constructor_atomic() {
 
     // Determine if the test passed or failed
     if (errors.str().empty()) {
-        std::cout << std::left << std::setw(50)
+        std::cout << std::left << std::setw(60)
                   << "[DTA2]. Test Parameterized Constructor."
                   << GREEN << "[Passed]" << RESET << std::endl;
     } else {
-        std::cout << std::left << std::setw(50)
+        std::cout << std::left << std::setw(60)
                   << "[DTA2]. Test Parameterized Constructor."
                   << RED << "[Failed]" << RESET << std::endl;
         std::cout << errors.str() << std::endl;
@@ -605,11 +605,11 @@ void test_init_atomic() {
 
     // Determine if the test passed or failed
     if (errors.str().empty()) {
-        std::cout << std::left << std::setw(50)
+        std::cout << std::left << std::setw(60)
                   << "[DTA3]. Test Init Method."
                   << GREEN << "[Passed]" << RESET << std::endl;
     } else {
-        std::cout << std::left << std::setw(50)
+        std::cout << std::left << std::setw(60)
                   << "[DTA3]. Test Init Method."
                   << RED << "[Failed]" << RESET << std::endl;
         std::cout << errors.str() << std::endl;
@@ -643,11 +643,11 @@ void test_move_constructor_atomic() {
 
     // Determine if the test passed or failed
     if (errors.str().empty()) {
-        std::cout << std::left << std::setw(50)
+        std::cout << std::left << std::setw(60)
                   << "[DTA4]. Test Move Constructor."
                   << GREEN << "[Passed]" << RESET << std::endl;
     } else {
-        std::cout << std::left << std::setw(50)
+        std::cout << std::left << std::setw(60)
                   << "[DTA4]. Test Move Constructor."
                   << RED << "[Failed]" << RESET << std::endl;
         std::cout << errors.str() << std::endl;
@@ -698,11 +698,11 @@ void test_move_assignment_atomic() {
 
     // Determine if the test passed or failed
     if (errors.str().empty()) {
-        std::cout << std::left << std::setw(50)
+        std::cout << std::left << std::setw(60)
                   << "[DTA5]. Test Move Assignment Operator."
                   << GREEN << "[Passed]" << RESET << std::endl;
     } else {
-        std::cout << std::left << std::setw(50)
+        std::cout << std::left << std::setw(60)
                   << "[DTA5]. Test Move Assignment Operator."
                   << RED << "[Failed]" << RESET << std::endl;
         std::cout << errors.str() << std::endl;
@@ -733,11 +733,11 @@ void test_get_set_dependency_atomic() {
 
     // Determine if the test passed or failed
     if (errors.str().empty()) {
-        std::cout << std::left << std::setw(50)
+        std::cout << std::left << std::setw(60)
                   << "[DTA6]. Test Get and Set Dependency."
                   << GREEN << "[Passed]" << RESET << std::endl;
     } else {
-        std::cout << std::left << std::setw(50)
+        std::cout << std::left << std::setw(60)
                   << "[DTA6]. Test Get and Set Dependency."
                   << RED << "[Failed]" << RESET << std::endl;
         std::cout << errors.str() << std::endl;
@@ -788,11 +788,11 @@ void test_operator_overloading_atomic() {
 
     // Determine if the test passed or failed
     if (errors.str().empty()) {
-        std::cout << std::left << std::setw(50)
+        std::cout << std::left << std::setw(60)
                   << "[DTA7]. Test Operator Overloading."
                   << GREEN << "[Passed]" << RESET << std::endl;
     } else {
-        std::cout << std::left << std::setw(50)
+        std::cout << std::left << std::setw(60)
                   << "[DTA7]. Test Operator Overloading."
                   << RED << "[Failed]" << RESET << std::endl;
         std::cout << errors.str() << std::endl;
@@ -833,11 +833,11 @@ void test_out_of_bounds_atomic() {
 
     // Determine if the test passed or failed
     if (errors.str().empty()) {
-        std::cout << std::left << std::setw(50)
+        std::cout << std::left << std::setw(60)
                   << "[DTA8]. Test Out of Bounds Access."
                   << GREEN << "[Passed]" << RESET << std::endl;
     } else {
-        std::cout << std::left << std::setw(50)
+        std::cout << std::left << std::setw(60)
                   << "[DTA8]. Test Out of Bounds Access."
                   << RED << "[Failed]" << RESET << std::endl;
         std::cout << errors.str() << std::endl;
@@ -855,11 +855,11 @@ void test_queue_empty_and_size() {
     CHECK(q.size() == 0, "Queue size should be 0 initially", errors);
 
     if (errors.str().empty()) {
-         std::cout << std::left << std::setw(50)
+         std::cout << std::left << std::setw(60)
                    << "[QueueTest1] Test Empty and Size"
                    << GREEN << "[Passed]" << RESET << std::endl;
     } else {
-         std::cout << std::left << std::setw(50)
+         std::cout << std::left << std::setw(60)
                    << "[QueueTest1] Test Empty and Size"
                    << RED << "[Failed]" << RESET << std::endl;
          std::cout << errors.str();
@@ -892,11 +892,11 @@ void test_queue_push_pop_fifo() {
     CHECK(!d.has_value(), "pop_front on empty queue should return nullopt", errors);
 
     if (errors.str().empty()) {
-         std::cout << std::left << std::setw(50)
+         std::cout << std::left << std::setw(60)
                    << "[QueueTest2] Test Push_Back and Pop_Front FIFO"
                    << GREEN << "[Passed]" << RESET << std::endl;
     } else {
-         std::cout << std::left << std::setw(50)
+         std::cout << std::left << std::setw(60)
                    << "[QueueTest2] Test Push_Back and Pop_Front FIFO"
                    << RED << "[Failed]" << RESET << std::endl;
          std::cout << errors.str();
@@ -923,11 +923,11 @@ void test_queue_push_front_pop_back() {
     CHECK(queue.empty(), "Queue should be empty after pop_back operations", errors);
 
     if (errors.str().empty()) {
-         std::cout << std::left << std::setw(50)
+         std::cout << std::left << std::setw(60)
                    << "[QueueTest3] Test Push_Front and Pop_Back"
                    << GREEN << "[Passed]" << RESET << std::endl;
     } else {
-         std::cout << std::left << std::setw(50)
+         std::cout << std::left << std::setw(60)
                    << "[QueueTest3] Test Push_Front and Pop_Back"
                    << RED << "[Failed]" << RESET << std::endl;
          std::cout << errors.str();
@@ -954,11 +954,11 @@ void test_queue_full() {
     CHECK(!queue.full(), "Queue should not be full after a pop", errors);
 
     if (errors.str().empty()) {
-         std::cout << std::left << std::setw(50)
+         std::cout << std::left << std::setw(60)
                    << "[QueueTest4] Test Full Queue Behavior"
                    << GREEN << "[Passed]" << RESET << std::endl;
     } else {
-         std::cout << std::left << std::setw(50)
+         std::cout << std::left << std::setw(60)
                    << "[QueueTest4] Test Full Queue Behavior"
                    << RED << "[Failed]" << RESET << std::endl;
          std::cout << errors.str();
@@ -1010,11 +1010,11 @@ void test_queue_multi_threaded() {
           "Consumed count should equal num_elements", errors);
 
     if (errors.str().empty()) {
-         std::cout << std::left << std::setw(50)
+         std::cout << std::left << std::setw(60)
                    << "[QueueTest5] Test Multi-threaded Operations"
                    << GREEN << "[Passed]" << RESET << std::endl;
     } else {
-         std::cout << std::left << std::setw(50)
+         std::cout << std::left << std::setw(60)
                    << "[QueueTest5] Test Multi-threaded Operations"
                    << RED << "[Failed]" << RESET << std::endl;
          std::cout << errors.str();
@@ -1023,18 +1023,221 @@ void test_queue_multi_threaded() {
 }
 
 
+// ==================== CircularQueueAtomic Tests ========================= //
+
+// Test 1: Verify that a new queue is empty and its size is zero.
+void test_atomic_queue_empty_and_size() {
+    std::stringstream errors;
+    CircularQueueAtomic<int> queue(5);
+    CHECK(queue.empty(), "Queue should be empty initially", errors);
+    CHECK(queue.size() == 0, "Queue size should be 0 initially", errors);
+
+    if (errors.str().empty()) {
+         std::cout << std::left << std::setw(60)
+                   << "[AtomicQueueTest1] Test Empty and Size"
+                   << GREEN << "[Passed]" << RESET << std::endl;
+    } else {
+         std::cout << std::left << std::setw(60)
+                   << "[AtomicQueueTest1] Test Empty and Size"
+                   << RED << "[Failed]" << RESET << std::endl;
+         std::cout << errors.str();
+         total_failures++;
+    }
+}
+
+// Test 2: Test push_back and pop_front (FIFO behavior).
+void test_atomic_queue_push_pop_fifo() {
+    std::stringstream errors;
+    CircularQueueAtomic<int> queue(5);
+
+    // Insert elements using push_back.
+    for (int i = 0; i < 3; ++i) {
+        bool ok = queue.push_back(i);
+        CHECK(ok, "push_back should succeed", errors);
+    }
+    CHECK(queue.size() == 3, "Queue size should be 3 after 3 pushes", errors);
+
+    // Remove the elements using pop_front and verify FIFO order.
+    for (int i = 0; i < 3; ++i) {
+        auto opt = queue.pop_front();
+        CHECK(opt.has_value(), "pop_front should return a value", errors);
+        CHECK(opt.value() == i, "pop_front value should match FIFO order", errors);
+    }
+    CHECK(queue.empty(), "Queue should be empty after popping all elements", errors);
+
+    if (errors.str().empty()) {
+         std::cout << std::left << std::setw(60)
+                   << "[AtomicQueueTest2] Test Push_Back and Pop_Front FIFO"
+                   << GREEN << "[Passed]" << RESET << std::endl;
+    } else {
+         std::cout << std::left << std::setw(60)
+                   << "[AtomicQueueTest2] Test Push_Back and Pop_Front FIFO"
+                   << RED << "[Failed]" << RESET << std::endl;
+         std::cout << errors.str();
+         total_failures++;
+    }
+}
+
+// Test 3: Test push_front and pop_back (reverse order behavior).
+void test_atomic_queue_push_front_pop_back() {
+    std::stringstream errors;
+    CircularQueueAtomic<int> queue(5);
+
+    // Insert elements using push_front.
+    for (int i = 0; i < 3; ++i) {
+        bool ok = queue.push_front(100 + i);
+        CHECK(ok, "push_front should succeed", errors);
+    }
+    // When using push_front, the first inserted element is at the back.
+    // Removing elements via pop_back should return them in the order of insertion.
+    for (int i = 0; i < 3; ++i) {
+        auto opt = queue.pop_back();
+        CHECK(opt.has_value(), "pop_back should return a value", errors);
+        CHECK(opt.value() == 100 + i, "pop_back value should match order", errors);
+    }
+    CHECK(queue.empty(), "Queue should be empty after pop_back operations", errors);
+
+    if (errors.str().empty()) {
+         std::cout << std::left << std::setw(60)
+                   << "[AtomicQueueTest3] Test Push_Front and Pop_Back"
+                   << GREEN << "[Passed]" << RESET << std::endl;
+    } else {
+         std::cout << std::left << std::setw(60)
+                   << "[AtomicQueueTest3] Test Push_Front and Pop_Back"
+                   << RED << "[Failed]" << RESET << std::endl;
+         std::cout << errors.str();
+         total_failures++;
+    }
+}
+
+// Test 4: Test full queue behavior.
+void test_atomic_queue_full() {
+    std::stringstream errors;
+    CircularQueueAtomic<int> queue(3);
+
+    // Fill the queue.
+    CHECK(queue.push_back(1), "push_back 1 should succeed", errors);
+    CHECK(queue.push_back(2), "push_back 2 should succeed", errors);
+    CHECK(queue.push_back(3), "push_back 3 should succeed", errors);
+    CHECK(queue.full(), "Queue should be full after three pushes", errors);
+
+    // Additional pushes should fail.
+    CHECK(!queue.push_back(4), "push_back 4 should fail on full queue", errors);
+    CHECK(!queue.push_front(5), "push_front 5 should fail on full queue", errors);
+
+    // After a pop, the queue should no longer be full.
+    auto opt = queue.pop_front();
+    CHECK(opt.has_value(), "pop_front should succeed", errors);
+    CHECK(!queue.full(), "Queue should not be full after popping an element", errors);
+
+    if (errors.str().empty()) {
+         std::cout << std::left << std::setw(60)
+                   << "[AtomicQueueTest4] Test Full Queue Behavior"
+                   << GREEN << "[Passed]" << RESET << std::endl;
+    } else {
+         std::cout << std::left << std::setw(60)
+                   << "[AtomicQueueTest4] Test Full Queue Behavior"
+                   << RED << "[Failed]" << RESET << std::endl;
+         std::cout << errors.str();
+         total_failures++;
+    }
+}
+
+// Test 5: Multi-threaded Producer/Consumer Operations.
+void test_atomic_queue_multi_threaded() {
+    std::stringstream errors;
+    const size_t capacity = 50;
+    const int numElements = 1000;
+    CircularQueueAtomic<int> queue(capacity);
+    std::atomic<bool> done{false};
+    std::atomic<int> produced{0};
+    std::atomic<int> consumed{0};
+
+    // Producer thread: pushes numbers into the queue.
+    auto producer = [&]() {
+         for (int i = 0; i < numElements; ++i) {
+              while (!queue.push_back(i)) {
+                   std::this_thread::yield();
+              }
+              produced.fetch_add(1, std::memory_order_relaxed);
+         }
+         done = true;
+    };
+
+    // Consumer thread: pops numbers from the queue.
+    auto consumer = [&]() {
+         while (!done || !queue.empty()) {
+              auto item = queue.pop_front();
+              if (item.has_value()) {
+                   consumed.fetch_add(1, std::memory_order_relaxed);
+              } else {
+                   std::this_thread::yield();
+              }
+         }
+    };
+
+    std::thread prodThread(producer);
+    std::thread consThread(consumer);
+    prodThread.join();
+    consThread.join();
+
+    CHECK(produced.load(std::memory_order_relaxed) == numElements, "Produced count should equal numElements", errors);
+    CHECK(consumed.load(std::memory_order_relaxed) == numElements, "Consumed count should equal numElements", errors);
+
+    if (errors.str().empty()) {
+         std::cout << std::left << std::setw(60)
+                   << "[AtomicQueueTest5] Test Multi-threaded Operations"
+                   << GREEN << "[Passed]" << RESET << std::endl;
+    } else {
+         std::cout << std::left << std::setw(60)
+                   << "[AtomicQueueTest5] Test Multi-threaded Operations"
+                   << RED << "[Failed]" << RESET << std::endl;
+         std::cout << errors.str();
+         total_failures++;
+    }
+}
+
+// Test 6: Verify the convenience push/pop methods.
+void test_atomic_queue_push_and_pop() {
+    std::stringstream errors;
+    CircularQueueAtomic<int> queue(10);
+
+    // Use push (alias for push_back) to insert values.
+    for (int i = 0; i < 5; ++i) {
+         bool ok = queue.push(i);
+         CHECK(ok, "push should succeed", errors);
+    }
+    // Use pop (alias for pop_front) to remove values and verify FIFO order.
+    for (int i = 0; i < 5; ++i) {
+         auto result = queue.pop();
+         CHECK(result.has_value(), "pop should return a value", errors);
+         CHECK(result.value() == i, "pop should return FIFO order value", errors);
+    }
+
+    if (errors.str().empty()) {
+         std::cout << std::left << std::setw(60)
+                   << "[AtomicQueueTest6] Test push/pop Convenience Methods"
+                   << GREEN << "[Passed]" << RESET << std::endl;
+    } else {
+         std::cout << std::left << std::setw(60)
+                   << "[AtomicQueueTest6] Test push/pop Convenience Methods"
+                   << RED << "[Failed]" << RESET << std::endl;
+         std::cout << errors.str();
+         total_failures++;
+    }
+}
 
 int main(int argc, char *argv[]) {
     std::cout << "Inside Test.\n" << std::endl;
 
-    std::cout << YELLOW << "Testing Matrix Methods." << RESET << std::endl;
+    std::cout << YELLOW << "Starting matrix_t Test Cases." << RESET << std::endl;
 
     // Run matrix_t test functions
     test_operator_access();
     test_get_set();
     test_save();
 
-    std::cout << YELLOW << "\nTesting DependencyTable Methods." << RESET << std::endl;
+    std::cout << YELLOW << "\nStarting DependencyTable Test Cases." << RESET << std::endl;
 
     // Run DependencyTable test functions
     test_default_constructor();
@@ -1046,7 +1249,7 @@ int main(int argc, char *argv[]) {
     test_operator_overloading();
     test_out_of_bounds();
 
-    std::cout << YELLOW << "\nTesting DependencyTableAtomic Methods." << RESET << std::endl;
+    std::cout << YELLOW << "\nStarting DependencyTableAtomic Test Cases." << RESET << std::endl;
 
     // Run DependencyTableAtomic test functions
     test_default_constructor_atomic();
@@ -1058,13 +1261,22 @@ int main(int argc, char *argv[]) {
     test_operator_overloading_atomic();
     test_out_of_bounds_atomic();
 
-    std::cout << YELLOW << "\nStarting CircularQueueMtx Test Cases" << RESET << std::endl;
+    std::cout << YELLOW << "\nStarting CircularQueueMtx Test Cases." << RESET << std::endl;
 
     test_queue_empty_and_size();
     test_queue_push_pop_fifo();
     test_queue_push_front_pop_back();
     test_queue_full();
     test_queue_multi_threaded();
+
+    std::cout << YELLOW << "\nStarting CircularQueueAtomic Test Cases." << RESET << std::endl;
+
+    test_atomic_queue_empty_and_size();
+    test_atomic_queue_push_pop_fifo();
+    test_atomic_queue_push_front_pop_back();
+    test_atomic_queue_full();
+    test_atomic_queue_multi_threaded();
+    test_atomic_queue_push_and_pop();
 
 
     std::cout << std::endl;
