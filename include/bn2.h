@@ -75,37 +75,93 @@ public:
     }
 
     // Method to read matrix from a file
-    void read_matrix(const std::string& filename){
+    void read_matrix(const std::string& filename) {
         std::ifstream infile(filename);
         if (!infile.is_open()) {
             throw std::runtime_error("Error opening file: " + filename);
         }
 
-        // Read matrix dimensions
-        infile >> m >> n;
-        if (infile.fail()) {
-            throw std::runtime_error("Error reading matrix dimensions from file.");
+        std::string line;
+        if (!std::getline(infile, line)) {
+            throw std::runtime_error("Error: file is empty.");
         }
 
-        // Resize the data vector to hold m * n elements
-        data.resize(m * n);
-
-        // Read matrix elements
-        for (int i = 0; i < m; ++i) {
-            for (int j = 0; j < n; ++j) {
-                infile >> data[i * n + j];
-                if (infile.fail()) {
-                    throw std::runtime_error("Error reading matrix value at (" +
-                                            std::to_string(i) + ", " + std::to_string(j) + ").");
+        // Try to interpret the first line as header containing m and n.
+        bool headerParsed = false;
+        {
+            std::istringstream iss(line);
+            int possible_m, possible_n;
+            if (iss >> possible_m >> possible_n) {
+                // Check if there are any extra tokens on the first line.
+                std::string extra;
+                if (!(iss >> extra)) { // Exactly two tokens found
+                    headerParsed = true;
+                    m = possible_m;
+                    n = possible_n;
                 }
             }
         }
 
-        T extra;
-        if (infile >> extra) {
-            throw std::runtime_error("Extra data found in the file after reading the matrix.");
-        }
+        if (headerParsed) {
+            // Allocate enough space for the matrix data.
+            data.resize(m * n);
 
+            // Read m*n values from the remaining file.
+            for (int i = 0; i < m; ++i) {
+                for (int j = 0; j < n; ++j) {
+                    if (!(infile >> data[i * n + j])) {
+                        throw std::runtime_error("Error reading matrix value at (" +
+                                                 std::to_string(i) + ", " + std::to_string(j) + ").");
+                    }
+                }
+            }
+
+            // Ensure there is no extra data.
+            T extra;
+            if (infile >> extra) {
+                throw std::runtime_error("Extra data found in the file after reading the matrix.");
+            }
+        } else {
+            // No valid header found: treat the file as pure matrix data.
+            // Process the first line as a data row.
+            std::vector<T> temp_data;
+            {
+                std::istringstream row_stream(line);
+                T value;
+                while (row_stream >> value) {
+                    temp_data.push_back(value);
+                }
+            }
+            if (temp_data.empty()) {
+                throw std::runtime_error("Error: first line does not contain any matrix data.");
+            }
+            // The number of columns is determined by the first line.
+            n = temp_data.size();
+            m = 1;  // We already read one row
+
+            // Now process the rest of the file line by line.
+            while (std::getline(infile, line)) {
+                // Optionally skip empty lines.
+                if (line.empty()) {
+                    continue;
+                }
+                std::istringstream row_stream(line);
+                int col_count = 0;
+                T value;
+                while (row_stream >> value) {
+                    temp_data.push_back(value);
+                    ++col_count;
+                }
+                if (col_count != n) {
+                    throw std::runtime_error("Inconsistent number of columns in the matrix file. "
+                                             "Expected " + std::to_string(n) + ", but got " +
+                                             std::to_string(col_count) + ".");
+                }
+                ++m;
+            }
+            // Finally, assign the data read.
+            data = std::move(temp_data);
+        }
         infile.close();
     }
 
