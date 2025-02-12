@@ -74,7 +74,20 @@ public:
         read_matrix(filename);
     }
 
-     // Initializer list constructor
+    // Copy constructor
+    matrix_t(const matrix_t& other) : m(other.m), n(other.n), data(other.data) {}
+
+    // Copy assignment operator
+    matrix_t& operator=(const matrix_t& other) {
+        if (this != &other) {
+            m = other.m;
+            n = other.n;
+            data = other.data;
+        }
+        return *this;
+    }
+
+    // Initializer list constructor
     matrix_t(std::initializer_list<std::initializer_list<T>> init) {
         m = static_cast<int>(init.size());
         n = (m > 0) ? static_cast<int>(init.begin()->size()) : 0;
