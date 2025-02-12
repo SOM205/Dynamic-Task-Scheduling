@@ -858,12 +858,12 @@ public:
     }
 
     // push: Alias for push_back so that the deque can be used as a normal FIFO queue.
-    bool push(const T &value) {
+    inline bool push(const T &value) {
         return push_back(value);
     }
 
     // pop: Alias for pop_front so that the deque can be used as a normal FIFO queue.
-    std::optional<T> pop() {
+    inline std::optional<T> pop() {
         return pop_front();
     }
 };
