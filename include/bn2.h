@@ -74,6 +74,31 @@ public:
         read_matrix(filename);
     }
 
+     // Initializer list constructor
+    matrix_t(std::initializer_list<std::initializer_list<T>> init) {
+        m = static_cast<int>(init.size());
+        n = (m > 0) ? static_cast<int>(init.begin()->size()) : 0;
+
+        // Check that all rows have the same number of columns
+        for (const auto& row : init) {
+            if (static_cast<int>(row.size()) != n) {
+                throw std::invalid_argument("All rows in initializer list must have the same number of columns.");
+            }
+        }
+
+        // Resize the data vector and populate it
+        data.resize(m * n);
+        int i = 0;
+        for (const auto& row : init) {
+            int j = 0;
+            for (const auto& value : row) {
+                data[i * n + j] = value;
+                ++j;
+            }
+            ++i;
+        }
+    }
+
     // Method to read matrix from a file
     void read_matrix(const std::string& filename) {
         std::ifstream infile(filename);
