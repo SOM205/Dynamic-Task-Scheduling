@@ -112,6 +112,11 @@ public:
         }
     }
 
+    // Fill the matrix with a constant value of type T
+    void fill(const T& value) {
+        std::fill(data.begin(), data.end(), value);
+    }
+
     // Method to read matrix from a file
     void read_matrix(const std::string& filename) {
         std::ifstream infile(filename);
