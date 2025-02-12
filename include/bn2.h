@@ -374,12 +374,12 @@ class DependencyTable {
     }
 
     // Prints the dependency table
-    void printDependencyTable() const {
+    void printDependencyTable(std::ostream &os = std::cout) const {
         for (size_t i = 0; i < m; ++i) {
             for (size_t j = 0; j < n; ++j) {
-                std::cout << (getDependency(i, j) ? "1 " : "0 ");
+                os << (getDependency(i, j) ? "1 " : "0 ");
             }
-            std::cout << "\n";
+            os << "\n";
         }
     }
 
@@ -489,14 +489,14 @@ public:
     }
 
     // Prints the dependency table
-    void printDependencyTable() const {
+     void printDependencyTable(std::ostream &os = std::cout) const {
         for (size_t i = 0; i < m; ++i) {
             for (size_t j = 0; j < n; ++j) {
                 // For printing, an acquire load ensures we see the latest state
                 bool val = data[i * n + j].load(std::memory_order_acquire);
-                std::cout << (val ? "1 " : "0 ");
+                os << (val ? "1 " : "0 ");
             }
-            std::cout << "\n";
+            os << "\n";
         }
     }
 
@@ -617,7 +617,7 @@ public:
 
     // Prints the task table.
     // For each cell, it prints the task type (or "N" if the pointer is nullptr).
-    void display() const {
+    void printTaskTable() const {
         for (int i = 0; i < m; ++i) {
             for (int j = 0; j < n; ++j) {
                 Task* t = data[i * n + j];
