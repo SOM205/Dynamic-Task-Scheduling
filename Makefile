@@ -4,7 +4,7 @@
 CXX = g++
 
 # Compiler flags
-CXXFLAGS = -std=c++17 -O2 -march=native -Wall -pthread -Iinclude
+CXXFLAGS = -std=c++17 -O3 -march=native -ffast-math -Wall -pthread -Iinclude
 
 # Debug flags
 DEBUGFLAGS = -std=c++17 -g -Wall -pthread -Iinclude
