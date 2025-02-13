@@ -4,6 +4,7 @@
 #include <sstream>
 #include <string>
 #include <stdexcept>
+#include <initializer_list>
 
 #include <chrono>
 #include <functional>
@@ -59,48 +60,44 @@ auto measure_exec_time(Func&& func, Args&&... args) {
 template <class T>
 class matrix_t {
 private:
-    int m;                  // Number of rows
-    int n;                  // Number of columns
-    std::vector<T> data;    // Flat vector to store matrix elements
+    int m;   // Number of rows
+    int n;   // Number of columns
+    T* data; // Pointer to allocated array holding matrix elements
 
 public:
     // Default constructor
-    matrix_t() : m(0), n(0), data() {}
+    matrix_t() : m(0), n(0), data(nullptr) {}
 
     // Parameterized constructor
-    matrix_t(int rows, int cols) : m(rows), n(cols), data(rows * cols) {}
+    matrix_t(int rows, int cols) : m(rows), n(cols), data(nullptr) {
+        if (rows > 0 && cols > 0) {
+            data = new T[rows * cols];
+        }
+    }
 
-    matrix_t(const std::string& filename) {
+    // Constructor to read matrix from a file
+    matrix_t(const std::string& filename) : m(0), n(0), data(nullptr) {
         read_matrix(filename);
     }
 
-    // Copy constructor
-    matrix_t(const matrix_t& other) : m(other.m), n(other.n), data(other.data) {}
-
-    // Copy assignment operator
-    matrix_t& operator=(const matrix_t& other) {
-        if (this != &other) {
-            m = other.m;
-            n = other.n;
-            data = other.data;
-        }
-        return *this;
-    }
-
     // Initializer list constructor
-    matrix_t(std::initializer_list<std::initializer_list<T>> init) {
+    matrix_t(std::initializer_list<std::initializer_list<T>> init) : m(0), n(0), data(nullptr) {
         m = static_cast<int>(init.size());
         n = (m > 0) ? static_cast<int>(init.begin()->size()) : 0;
 
-        // Check that all rows have the same number of columns
+        // Check that all rows have the same number of columns.
         for (const auto& row : init) {
             if (static_cast<int>(row.size()) != n) {
                 throw std::invalid_argument("All rows in initializer list must have the same number of columns.");
             }
         }
 
-        // Resize the data vector and populate it
-        data.resize(m * n);
+        // Allocate memory.
+        if (m * n > 0) {
+            data = new T[m * n];
+        }
+
+        // Populate the matrix.
         int i = 0;
         for (const auto& row : init) {
             int j = 0;
@@ -112,13 +109,77 @@ public:
         }
     }
 
-    // Fill the matrix with a constant value of type T
-    void fill(const T& value) {
-        std::fill(data.begin(), data.end(), value);
+    // Copy constructor
+    matrix_t(const matrix_t& other) : m(other.m), n(other.n), data(nullptr) {
+        if (m * n > 0) {
+            data = new T[m * n];
+            for (int i = 0; i < m * n; ++i) {
+                data[i] = other.data[i];
+            }
+        }
     }
 
-    // Method to read matrix from a file
+    // Move constructor
+    matrix_t(matrix_t&& other) noexcept : m(other.m), n(other.n), data(other.data) {
+        other.m = 0;
+        other.n = 0;
+        other.data = nullptr;
+    }
+
+    // Copy assignment operator
+    matrix_t& operator=(const matrix_t& other) {
+        if (this != &other) {
+            // Delete current data.
+            delete[] data;
+            m = other.m;
+            n = other.n;
+            data = nullptr;
+            if (m * n > 0) {
+                data = new T[m * n];
+                for (int i = 0; i < m * n; ++i) {
+                    data[i] = other.data[i];
+                }
+            }
+        }
+        return *this;
+    }
+
+    // Move assignment operator
+    matrix_t& operator=(matrix_t&& other) noexcept {
+        if (this != &other) {
+            // Delete current data.
+            delete[] data;
+            m = other.m;
+            n = other.n;
+            data = other.data;
+
+            other.m = 0;
+            other.n = 0;
+            other.data = nullptr;
+        }
+        return *this;
+    }
+
+    // Destructor
+    ~matrix_t() {
+        delete[] data;
+    }
+
+    // Fill the matrix with a constant value of type T.
+    void fill(const T& value) {
+        if (data != nullptr) {
+            std::fill(data, data + m * n, value);
+        }
+    }
+
+    // Method to read matrix from a file.
     void read_matrix(const std::string& filename) {
+        // Clean up any previously allocated data.
+        delete[] data;
+        data = nullptr;
+        m = 0;
+        n = 0;
+
         std::ifstream infile(filename);
         if (!infile.is_open()) {
             throw std::runtime_error("Error opening file: " + filename);
@@ -129,15 +190,14 @@ public:
             throw std::runtime_error("Error: file is empty.");
         }
 
-        // Try to interpret the first line as header containing m and n.
+        // Try to interpret the first line as a header containing m and n.
         bool headerParsed = false;
         {
             std::istringstream iss(line);
             int possible_m, possible_n;
             if (iss >> possible_m >> possible_n) {
-                // Check if there are any extra tokens on the first line.
                 std::string extra;
-                if (!(iss >> extra)) { // Exactly two tokens found
+                if (!(iss >> extra)) { // Exactly two tokens found.
                     headerParsed = true;
                     m = possible_m;
                     n = possible_n;
@@ -146,10 +206,12 @@ public:
         }
 
         if (headerParsed) {
-            // Allocate enough space for the matrix data.
-            data.resize(m * n);
+            // Allocate memory for the matrix data.
+            if (m * n > 0) {
+                data = new T[m * n];
+            }
 
-            // Read m*n values from the remaining file.
+            // Read m*n values from the file.
             for (int i = 0; i < m; ++i) {
                 for (int j = 0; j < n; ++j) {
                     if (!(infile >> data[i * n + j])) {
@@ -166,7 +228,6 @@ public:
             }
         } else {
             // No valid header found: treat the file as pure matrix data.
-            // Process the first line as a data row.
             std::vector<T> temp_data;
             {
                 std::istringstream row_stream(line);
@@ -178,13 +239,12 @@ public:
             if (temp_data.empty()) {
                 throw std::runtime_error("Error: first line does not contain any matrix data.");
             }
-            // The number of columns is determined by the first line.
+            // Determine number of columns from the first line.
             n = temp_data.size();
-            m = 1;  // We already read one row
+            m = 1; // One row has been read already.
 
-            // Now process the rest of the file line by line.
+            // Process the rest of the file.
             while (std::getline(infile, line)) {
-                // Optionally skip empty lines.
                 if (line.empty()) {
                     continue;
                 }
@@ -202,17 +262,22 @@ public:
                 }
                 ++m;
             }
-            // Finally, assign the data read.
-            data = std::move(temp_data);
+            // Allocate memory and copy the temporary data.
+            if (m * n > 0) {
+                data = new T[m * n];
+            }
+            for (size_t i = 0; i < temp_data.size(); i++) {
+                data[i] = temp_data[i];
+            }
         }
         infile.close();
     }
 
-    // Accessor methods
+    // Accessor methods.
     int rows() const { return m; }
     int cols() const { return n; }
 
-    // Operator to access elements
+    // Element access operators.
     T& operator()(int row, int col) {
         if (row < 0 || row >= m || col < 0 || col >= n) {
             throw std::out_of_range("Matrix indices out of range");
@@ -227,24 +292,28 @@ public:
         return data[row * n + col];
     }
 
+    // Inline getter.
     inline T get(int row, int col) const {
         return data[row * n + col];
     }
 
+    // Inline setter.
     inline void set(int row, int col, T value) {
         data[row * n + col] = value;
     }
 
+    // Return raw pointer to data (non-const and const).
     inline T* data_ptr() {
-        return data.data();
+        return data;
     }
 
     inline const T* data_ptr() const {
-        return data.data();
+        return data;
     }
 
-    void display() const{
-        if (m == 0 || n == 0 || data.empty()) {
+    // Display the matrix.
+    void display() const {
+        if (m == 0 || n == 0 || data == nullptr) {
             std::cerr << "Matrix is not allocated.\n";
             return;
         }
@@ -253,13 +322,13 @@ public:
             for (int j = 0; j < n; ++j) {
                 std::cout << data[i * n + j] << " ";
             }
-        std::cout << "\n";
+            std::cout << "\n";
         }
     }
 
+    // Save the matrix to a file.
     void save(const std::string& filename) const {
-        // Check if the matrix has been allocated (i.e., has non-zero dimensions)
-        if (m == 0 || n == 0 || data.empty()) {
+        if (m == 0 || n == 0 || data == nullptr) {
             std::cerr << "Matrix is not allocated.\n";
             return;
         }
@@ -269,7 +338,7 @@ public:
             throw std::runtime_error("Error opening file for writing: " + filename);
         }
 
-        // Write the matrix data
+        // Write the matrix data.
         for (int i = 0; i < m; ++i) {
             for (int j = 0; j < n; ++j) {
                 outfile << data[i * n + j];
@@ -282,7 +351,6 @@ public:
                 throw std::runtime_error("Error writing matrix data to file: " + filename);
             }
         }
-
         outfile.close();
     }
 };
