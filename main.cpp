@@ -182,10 +182,8 @@ void* thdwork(void* params){
             int i = local_task->chunk_idx_i;
             int j = local_task->chunk_idx_j;
 
-            int rtid = distribution(generator);
-
             if (dependency_table.getDependency(i, j-1)){
-                mainQueues[rtid]->push(local_task);
+                mainQueues[tid]->push(local_task);
             }
             else{
                 wait_queue.push(local_task);   
