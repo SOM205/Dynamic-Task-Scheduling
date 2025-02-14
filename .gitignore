@@ -12,3 +12,6 @@ build/
 
 # Ignore vim swap files
 *.swp
+
+# Ignore text files
+*.txt
