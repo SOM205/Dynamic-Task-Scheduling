@@ -26,7 +26,7 @@ typedef struct {
 std::vector<std::stringstream> logstreams(NUM_THREADS);
 
 TaskTable task_table;
-DependencyTableAtomic dependency_table;
+DependencyTable dependency_table;
 
 std::vector<double> global_up_array, global_b_array;
 
