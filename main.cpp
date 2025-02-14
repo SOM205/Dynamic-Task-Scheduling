@@ -3,10 +3,14 @@
 #include <string>
 #include <cmath>
 #include <pthread.h>
-#include "bn2.h"
+
 #include <unistd.h>
 #include <csignal>
 #include <cstdlib>
+#include <random>
+#include <memory>
+
+#include "bn2.h"
 
 #define NUM_THREADS 28
 
@@ -26,11 +30,16 @@ typedef struct {
 std::vector<std::stringstream> logstreams(NUM_THREADS);
 
 TaskTable task_table;
-DependencyTableAtomic dependency_table;
+DependencyTable dependency_table;
+
+thread_local std::mt19937 generator(std::random_device{}());
+thread_local std::uniform_int_distribution<int> distribution(0, NUM_THREADS-1);
 
 std::vector<double> global_up_array, global_b_array;
 
-CircularQueueMtx<Task*> main_queue(1024), wait_queue(1024);
+std::vector<std::unique_ptr<CircularQueueMtx<Task*>>> mainQueues;
+
+CircularQueueMtx<Task*> wait_queue(1024);
 
 void complete_task1(double* &mat, int m, int n, int row_start, int row_end, int col_start, int col_end){
 
@@ -122,7 +131,7 @@ void complete_task2(double* &mat, int m, int n, int row_start, int row_end, int 
 
 void* thdwork(void* params){
     thread_args_t* thread_args = (thread_args_t*)params;
-
+    int tid = thread_args->tid;
     int total_task_rows = thread_args->total_task_rows;
     int total_task_cols = thread_args->total_task_cols;
     double* mat = thread_args->mat;
@@ -130,7 +139,7 @@ void* thdwork(void* params){
     int n = thread_args->n;
 
     while (1) {
-        auto queue_elem1 = main_queue.pop();
+        auto queue_elem1 = mainQueues[tid]->pop();
         if (Task* new_task = queue_elem1.value_or(nullptr)){
             
             int i = new_task->chunk_idx_i;
@@ -147,9 +156,9 @@ void* thdwork(void* params){
 
                 for (int k = i+1; k < total_task_rows; k++){
                     Task* next_task = task_table.getTask(k, j);
-
+                    int rtid = distribution(generator);
                     if (j == 0 || dependency_table.getDependency(k, j-1)){
-                        main_queue.push(next_task);
+                        mainQueues[rtid]->push(next_task);
                     }
                     else{
                         wait_queue.push(next_task);
@@ -159,9 +168,11 @@ void* thdwork(void* params){
             else if (new_task->type == 2){
                 complete_task2(mat, m, n, row_start, row_end, col_start, col_end);
                 dependency_table.setDependency(i, j, true);
-
+                
+                int rtid = distribution(generator);
+                
                 if (new_task->enq_nxt_t1 && (j+1) <= total_task_cols){
-                    main_queue.push(task_table.getTask((j+1)/BETA_DIV_ALPHA, j+1));
+                    mainQueues[rtid]->push(task_table.getTask((j+1)/BETA_DIV_ALPHA, j+1));
                 }
             }
         }
@@ -171,8 +182,10 @@ void* thdwork(void* params){
             int i = local_task->chunk_idx_i;
             int j = local_task->chunk_idx_j;
 
+            int rtid = distribution(generator);
+
             if (dependency_table.getDependency(i, j-1)){
-                main_queue.push(local_task);
+                mainQueues[rtid]->push(local_task);
             }
             else{
                 wait_queue.push(local_task);   
@@ -218,7 +231,11 @@ int main(int argc, char *argv[]){
         thread_args[i].mat = data_matrix.data_ptr();
     }
     
-    main_queue.push(task_table.getTask(0, 0));
+    for (int i = 0; i < NUM_THREADS; i++){
+        mainQueues.push_back(std::make_unique<CircularQueueMtx<Task*>>(1024));
+    }    
+
+    mainQueues[0]->push(task_table.getTask(0, 0));
 
     auto start = std::chrono::high_resolution_clock::now();
     
