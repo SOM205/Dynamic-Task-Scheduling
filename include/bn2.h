@@ -751,6 +751,21 @@ class CircularQueueMtx {
         return true;
     }
 
+    bool push_rotated(const T &value) {
+        std::lock_guard<std::mutex> lock(mutex);
+        if (count == capacity) {
+            return false;  // Queue is full.
+        }
+        buffer[rear] = value;
+        if (count > 2){
+            size_t lastIndex = (rear + capacity - 1) % capacity;
+            std::swap(buffer[front+1], buffer[lastIndex]);
+        }
+        rear = (rear + 1) % capacity;
+        ++count;
+        return true;
+    }
+
     // Push an element at the back of the queue.
     // Returns true if the operation was successful (i.e. the queue wasn’t full).
     bool push_back(const T &value) {
