@@ -11,8 +11,10 @@
 #define NUM_THREADS 28
 
 #define BETA 16
-#define ALPHA 8
+#define ALPHA 16
 #define BETA_DIV_ALPHA ((int)BETA/(int)ALPHA)
+
+#define PRIORITIZE_CRITICAL_NODES 0
 
 typedef struct {
     int tid;
@@ -149,7 +151,18 @@ void* thdwork(void* params){
                     Task* next_task = task_table.getTask(k, j);
 
                     if (j == 0 || dependency_table.getDependency(k, j-1)){
-                        main_queue.push(next_task);
+                        
+                        #if PRIORITIZE_CRITICAL_NODES
+
+                            if (next_task->enq_nxt_t1){
+                                main_queue.push_rotated(next_task);
+                            }
+                            else{
+                                main_queue.push(next_task);
+                            }
+                        #else
+                            main_queue.push(next_task);
+                        #endif
                     }
                     else{
                         wait_queue.push(next_task);
@@ -161,7 +174,11 @@ void* thdwork(void* params){
                 dependency_table.setDependency(i, j, true);
 
                 if (new_task->enq_nxt_t1 && (j+1) <= total_task_cols){
-                    main_queue.push(task_table.getTask((j+1)/BETA_DIV_ALPHA, j+1));
+                    #if PRIORITIZE_CRITICAL_NODES
+                        main_queue.push_rotated(task_table.getTask((j+1)/BETA_DIV_ALPHA, j+1));
+                    #else
+                        main_queue.push(task_table.getTask((j+1)/BETA_DIV_ALPHA, j+1));
+                    #endif
                 }
             }
         }
