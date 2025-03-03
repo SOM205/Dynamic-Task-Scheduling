@@ -7,6 +7,8 @@
 #include <unistd.h>
 #include <csignal>
 #include <cstdlib>
+#include <random>
+#include <chrono>
 
 #define NUM_THREADS 28
 
@@ -14,7 +16,6 @@
 #define ALPHA 16
 #define BETA_DIV_ALPHA ((int)BETA/(int)ALPHA)
 
-#define PRIORITIZE_CRITICAL_NODES 0
 
 typedef struct {
     int tid;
@@ -28,11 +29,8 @@ typedef struct {
 std::vector<std::stringstream> logstreams(NUM_THREADS);
 
 TaskTable task_table;
-DependencyTable dependency_table;
-
 std::vector<double> global_up_array, global_b_array;
-
-CircularQueueMtx<Task*> main_queue(1024), wait_queue(1024);
+pthread_barrier_t barrier;
 
 void complete_task1(double* &mat, int m, int n, int row_start, int row_end, int col_start, int col_end){
 
@@ -49,7 +47,7 @@ void complete_task1(double* &mat, int m, int n, int row_start, int row_end, int 
             cl = fmax(sm, cl);
         }
 
-        if (cl <= 0.0) { return; } clinv = 1.0/cl;
+        if (cl <= 0.0) { continue; } clinv = 1.0/cl;
 
         double d__1 = mat[lpivot * n + lpivot] * clinv;
         sm = d__1 * d__1;
@@ -62,11 +60,11 @@ void complete_task1(double* &mat, int m, int n, int row_start, int row_end, int 
         up = mat[lpivot * n + lpivot] - cl;
         mat[lpivot * n + lpivot] = cl;
 
-        if (row_end - lpivot < 0) { return; }
+        if (row_end - lpivot < 0) { continue;; }
 
         b = up * mat[lpivot * n + lpivot];
 
-        if (b >= 0.0) { return; }
+        if (b >= 0.0) { continue; }
 
         b = 1.0/b;
 
@@ -124,80 +122,39 @@ void complete_task2(double* &mat, int m, int n, int row_start, int row_end, int 
 
 void* thdwork(void* params){
     thread_args_t* thread_args = (thread_args_t*)params;
-
-    int total_task_rows = thread_args->total_task_rows;
-    int total_task_cols = thread_args->total_task_cols;
+    int tid = thread_args->tid;
     double* mat = thread_args->mat;
     int m = thread_args->m;
     int n = thread_args->n;
 
-    while (1) {
-        auto queue_elem1 = main_queue.pop();
-        if (Task* new_task = queue_elem1.value_or(nullptr)){
-            
-            int i = new_task->chunk_idx_i;
-            int j = new_task->chunk_idx_j;
+    pthread_barrier_wait(&barrier);
 
-            int row_start = new_task->row_start;
-            int row_end = new_task->row_end;
-            int col_start = new_task->col_start;
-            int col_end = new_task->col_end;
+    for (int j = 0; j < task_table.cols(); j++){
+        size_t ctr = 0;
+        for (int i = 0; i < task_table.rows(); i++){
 
-            if (new_task->type == 1){
-                complete_task1(mat, m, n, row_start, row_end, col_start, col_end);
-                dependency_table.setDependency(i, j, true);
+            if (task_table.getTask(i, j) == nullptr) { ctr++; continue; }
 
-                for (int k = i+1; k < total_task_rows; k++){
-                    Task* next_task = task_table.getTask(k, j);
-
-                    if (j == 0 || dependency_table.getDependency(k, j-1)){
-                        
-                        #if PRIORITIZE_CRITICAL_NODES
-
-                            if (next_task->enq_nxt_t1){
-                                main_queue.push_rotated(next_task);
-                            }
-                            else{
-                                main_queue.push(next_task);
-                            }
-                        #else
-                            main_queue.push(next_task);
-                        #endif
-                    }
-                    else{
-                        wait_queue.push(next_task);
-                    }
+            if (ctr == (size_t)i){
+                Task* first_task = task_table.getTask(ctr, j);
+                //printf("Before T1 Barrier: %d %zu %d\n", tid, ctr, j);
+                pthread_barrier_wait(&barrier);
+                if (tid == 0){
+                    //printf("Inside T1 Barrier: %d %zu %d %d\n", tid, ctr, j, first_task->type);
+                    complete_task1(mat, m, n, first_task->row_start, first_task->row_end, first_task->col_start, first_task->col_end);
                 }
+                pthread_barrier_wait(&barrier);
             }
-            else if (new_task->type == 2){
-                complete_task2(mat, m, n, row_start, row_end, col_start, col_end);
-                dependency_table.setDependency(i, j, true);
 
-                if (new_task->enq_nxt_t1 && (j+1) <= total_task_cols){
-                    #if PRIORITIZE_CRITICAL_NODES
-                        main_queue.push_rotated(task_table.getTask((j+1)/BETA_DIV_ALPHA, j+1));
-                    #else
-                        main_queue.push(task_table.getTask((j+1)/BETA_DIV_ALPHA, j+1));
-                    #endif
-                }
+            size_t taskid = tid + (i-1) * NUM_THREADS + (ctr+1);
+
+            // printf("After T1 barrier: %d %zu %d\n", tid, taskid, j);
+
+            if (taskid < (size_t)task_table.rows()){
+                Task* task = task_table.getTask(taskid, j);
+                complete_task2(mat, m, n, task->row_start, task->row_end, task->col_start, task->col_end);
             }
-        }
-        auto queue_elem2 = wait_queue.pop();
-        if (Task* local_task = queue_elem2.value_or(nullptr)){
-
-            int i = local_task->chunk_idx_i;
-            int j = local_task->chunk_idx_j;
-
-            if (dependency_table.getDependency(i, j-1)){
-                main_queue.push(local_task);
-            }
-            else{
-                wait_queue.push(local_task);   
-            }
-        }
-
-        if (dependency_table.getDependency(total_task_rows-1, BETA_DIV_ALPHA * (total_task_rows-1))){
-            break;
+            pthread_barrier_wait(&barrier);
         }
     }
 
@@ -220,7 +177,6 @@ int main(int argc, char *argv[]){
     global_up_array.resize(data_matrix.rows(), 0.0);
     global_b_array.resize(data_matrix.rows() , 0.0);
 
-    dependency_table.init(total_task_rows, total_task_cols);
     task_table.init(total_task_rows, total_task_cols, ALPHA, BETA, data_matrix);
 
     std::vector<pthread_t> threads(NUM_THREADS);
@@ -234,8 +190,8 @@ int main(int argc, char *argv[]){
         thread_args[i].n = data_matrix.cols();
         thread_args[i].mat = data_matrix.data_ptr();
     }
-    
-    main_queue.push(task_table.getTask(0, 0));
+
+    pthread_barrier_init(&barrier, NULL, NUM_THREADS);
 
     auto start = std::chrono::high_resolution_clock::now();
     
@@ -253,7 +209,9 @@ int main(int argc, char *argv[]){
 
     std::cout << "Time taken: " << elapsed << " ms" << std::endl;
 
-    //data_matrix.save("output.txt");
+    pthread_barrier_destroy(&barrier);
+
+    data_matrix.save("output.txt");
 
     return 0;
 }
