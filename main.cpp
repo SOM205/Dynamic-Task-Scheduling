@@ -16,7 +16,6 @@
 #define ALPHA 16
 #define BETA_DIV_ALPHA ((int)BETA/(int)ALPHA)
 
-
 typedef struct {
     int tid;
     int total_task_rows;
@@ -170,8 +169,8 @@ int main(int argc, char *argv[]){
 
     matrix_t<double> data_matrix(argv[1]);
 
-    int total_task_rows = std::ceil(data_matrix.rows()/BETA);
-    int total_task_cols = std::ceil(data_matrix.rows()/ALPHA);
+    int total_task_rows = std::ceil((double)data_matrix.rows()/BETA);
+    int total_task_cols = std::ceil((double)data_matrix.rows()/ALPHA);
 
     global_up_array.resize(data_matrix.rows(), 0.0);
     global_b_array.resize(data_matrix.rows() , 0.0);
