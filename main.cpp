@@ -130,27 +130,27 @@ void* thdwork(void* params){
     pthread_barrier_wait(&barrier);
 
     for (int j = 0; j < task_table.cols(); j++){
-        size_t ctr = 0;
+        int ctr = 0;
         for (int i = 0; i < task_table.rows(); i++){
 
             if (task_table.getTask(i, j) == nullptr) { ctr++; continue; }
 
-            if (ctr == (size_t)i){
+            if (ctr == i){
                 Task* first_task = task_table.getTask(ctr, j);
                 //printf("Before T1 Barrier: %d %zu %d\n", tid, ctr, j);
                 pthread_barrier_wait(&barrier);
                 if (tid == 0){
-                    //printf("Inside T1 Barrier: %d %zu %d %d\n", tid, ctr, j, first_task->type);
+                    printf("Inside T1 Barrier: %d %d %d %d\n", tid, ctr, j, first_task->type);
                     complete_task1(mat, m, n, first_task->row_start, first_task->row_end, first_task->col_start, first_task->col_end);
                 }
                 pthread_barrier_wait(&barrier);
             }
 
-            size_t taskid = tid + (i-1) * NUM_THREADS + (ctr+1);
+            int taskid = tid + i * NUM_THREADS + (ctr+1);
 
-            // printf("After T1 barrier: %d %zu %d\n", tid, taskid, j);
+            printf("After T1 barrier: %d %d %d\n", tid, taskid, j);
 
-            if (taskid < (size_t)task_table.rows()){
+            if (taskid < task_table.rows()){
                 Task* task = task_table.getTask(taskid, j);
                 complete_task2(mat, m, n, task->row_start, task->row_end, task->col_start, task->col_end);
             }
