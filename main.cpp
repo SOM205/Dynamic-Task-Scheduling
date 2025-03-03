@@ -10,8 +10,8 @@
 
 #define NUM_THREADS 28
 
-#define BETA 16
-#define ALPHA 16
+#define BETA 10
+#define ALPHA 10
 #define BETA_DIV_ALPHA ((int)BETA/(int)ALPHA)
 
 #define PRIORITIZE_CRITICAL_NODES 0
@@ -214,8 +214,10 @@ int main(int argc, char *argv[]){
 
     matrix_t<double> data_matrix(argv[1]);
 
-    int total_task_rows = std::ceil(data_matrix.rows()/BETA);
-    int total_task_cols = std::ceil(data_matrix.rows()/ALPHA);
+    int total_task_rows = std::ceil((double)data_matrix.rows()/BETA);
+    int total_task_cols = std::ceil((double)data_matrix.rows()/ALPHA);
+
+    std::cout<< total_task_rows << " " << total_task_cols << std::endl;
 
     global_up_array.resize(data_matrix.rows(), 0.0);
     global_b_array.resize(data_matrix.rows() , 0.0);
@@ -253,7 +255,7 @@ int main(int argc, char *argv[]){
 
     std::cout << "Time taken: " << elapsed << " ms" << std::endl;
 
-    //data_matrix.save("output.txt");
+    data_matrix.save("output.txt");
 
     return 0;
 }
