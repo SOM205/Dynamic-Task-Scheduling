@@ -12,8 +12,8 @@
 
 #define NUM_THREADS 28
 
-#define BETA 16
-#define ALPHA 16
+#define BETA 10
+#define ALPHA 2
 #define BETA_DIV_ALPHA ((int)BETA/(int)ALPHA)
 
 
@@ -140,7 +140,7 @@ void* thdwork(void* params){
                 //printf("Before T1 Barrier: %d %zu %d\n", tid, ctr, j);
                 pthread_barrier_wait(&barrier);
                 if (tid == 0){
-                    printf("Inside T1 Barrier: %d %d %d %d\n", tid, ctr, j, first_task->type);
+                    //printf("Inside T1 Barrier: %d %d %d %d\n", tid, ctr, j, first_task->type);
                     complete_task1(mat, m, n, first_task->row_start, first_task->row_end, first_task->col_start, first_task->col_end);
                 }
                 pthread_barrier_wait(&barrier);
@@ -148,9 +148,8 @@ void* thdwork(void* params){
 
             int taskid = tid + i * NUM_THREADS + (ctr+1);
 
-            printf("After T1 barrier: %d %d %d\n", tid, taskid, j);
-
             if (taskid < task_table.rows()){
+                //printf("After T1 barrier: %d %d %d\n", tid, taskid, j);
                 Task* task = task_table.getTask(taskid, j);
                 complete_task2(mat, m, n, task->row_start, task->row_end, task->col_start, task->col_end);
             }
@@ -211,7 +210,7 @@ int main(int argc, char *argv[]){
 
     pthread_barrier_destroy(&barrier);
 
-    data_matrix.save("output.txt");
+    //data_matrix.save("output.txt");
 
     return 0;
 }
