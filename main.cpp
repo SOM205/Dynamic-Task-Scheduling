@@ -12,8 +12,8 @@
 
 #define NUM_THREADS 28
 
-#define BETA 10
-#define ALPHA 2
+#define BETA 16
+#define ALPHA 16
 #define BETA_DIV_ALPHA ((int)BETA/(int)ALPHA)
 
 
@@ -146,7 +146,7 @@ void* thdwork(void* params){
                 pthread_barrier_wait(&barrier);
             }
 
-            int taskid = tid + i * NUM_THREADS + (ctr+1);
+            int taskid = tid + ctr * NUM_THREADS + (ctr+1);
 
             if (taskid < task_table.rows()){
                 //printf("After T1 barrier: %d %d %d\n", tid, taskid, j);
